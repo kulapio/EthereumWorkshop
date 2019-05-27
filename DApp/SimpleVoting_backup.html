@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="web3.js"></script>
+        <script type="text/javascript">
+            var tokenAddr =         '';
+            var mainContractAddr =  '';
+            var network = "";
+            var userAccount = '';
+            var warning = "";
+        </script>
+        <script type="text/javascript">
+          window.addEventListener('load', function() {
+
+              // Modern dapp browsers...
+              if (window.ethereum) {
+                  web3 = new Web3(ethereum);
+
+                  try { 
+                    // Request account access if needed
+                    ethereum.enable().then(result => {
+                      // Now you can start your app & access web3 freely:
+                      startApp()
+                    })
+                  }
+                  catch(err) {
+                    console.log(err);
+                  }
+              }
+              // Legacy dapp browsers, checking if Web3 has been injected by the browser (Mist/MetaMask)
+              else if (typeof web3 !== 'undefined') {
+                // Use Mist/MetaMask's provider
+                web3 = new Web3(web3.currentProvider);
+
+                // Now you can start your app & access web3 freely:
+                startApp();
+
+              } else {
+                console.log('No web3? You should consider trying MetaMask!')
+                // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+                web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
+
+                // Now you can start your app & access web3 freely:
+                startApp();
+              }
+            })
+        
+            
+            // Get current network
+            function startApp() {
+                web3.eth.net.getId().then(netId => {
+                // web3.version.getNetwork((err, netId) => {
+                  console.log('netId: ' + netId)
+                  switch (netId) {
+                    case 1:
+                        network = 'Mainnet';
+                        warning = 'please switch your network to Kovan';
+                      break
+                    case 2:
+                        network = 'Deprecated Morden';
+                        warning = 'please switch your network to Kovan';
+                      break
+                    case 3:
+                        network = 'Ropsten';
+                        warning = 'please switch your network to Kovan';
+                        tokenAddr =         '0x95477082106ad76ec820a5e6bf8e35055003fd21';
+                        mainContractAddr =  '0x2ae53961e6cad27ed6ef71c4b1e6021786d7846b';
+                      break
+                    case 4:
+                        network = 'Rinkeby';
+                        warning = 'please switch your network to Kovan';
+                        tokenAddr =         '0x1Fb1670E4Ba34238cF16e5491eE6B2C436b52B38';
+                        mainContractAddr =  '0x4c94e3771998ae3791e35140f16a721ebf1c1019';
+                      break
+                    case 42:
+                        network = 'Kovan';
+                      break
+                    default:
+                        network = 'Unknown';
+                        warning = 'please switch your network to Kovan';
+                  }
+                  $("#eth_network").text(network);
+                  $("#warning").text(warning);
+                  
+                  
+                  web3.eth.getAccounts().then(accounts => {
+                    userAccount = accounts[0];
+                    $("#eth_address").text(userAccount);
+
+                    reloadInfo();
+                  })
+                })
+            }
+            
+            function reloadInfo() {
+                // Token
+                getKatinOwner();
+                getKatinName();
+                getKatinSymbol();
+                getKatinTotalSupply();
+                
+                // Wallet
+                try { 
+                    getBalance();
+                    getKatinBalance();
+                }
+                catch(err) {
+                    console.log(err);
+                }
+                
+                
+                // Main contract
+                getMainContractOwner();
+                getMainContractProposalCount( function (count) {
+                    $("#main_contract_proposal_count").text(count);
+                });
+                
+                // Proposals
+                displayProposals();
+            }
+            
+            // Get block info
+            function getBlock() {
+                web3.eth.getBlock(48, function(error, result){
+                    if(!error) {
+                        console.log(JSON.stringify(result));
+                        $("#balance").html(JSON.stringify(result));
+                    } else {
+                        console.error(error);
+                    }
+                })
+            }
+            
+            // Get Katin owner
+            function getKatinOwner() {
+                let contract = getTakinToken();
+                 contract.methods.owner().call().then( ownerAddr => { 
+                    console.log(ownerAddr) ;
+                    $("#Katin_owner").text(ownerAddr);
+                } );
+            }
+            
+            // Get account balance
+            function getBalance() {
+              web3.eth.getBalance(userAccount).then(result => {
+                  $("#balance").html(web3.utils.fromWei(result));
+              }); // getbalance account
+            }
+            
+            // Get Katin balance
+            function getKatinBalance() {
+              let contract = getTakinToken();
+              console.log(contract);
+              
+              contract.methods.balanceOf(userAccount).call().then( result => { 
+                  console.log('getKatinBalance: ' + result) ;
+                  
+                  $("#Katin_balance").text( web3.utils.fromWei(result ));
+              } );
+            }
+            
+            // Get Katin name
+            function getKatinName() {
+                let contract = getTakinToken();
+                contract.methods.name().call().then( ok => { 
+                    console.log(ok) ;
+                    $("#Katin_name").text(ok);
+                } );
+            }
+            
+            // Get Katin symbol
+            function getKatinSymbol() {
+                let contract = getTakinToken();
+                contract.methods.symbol().call().then( ok => { 
+                    console.log(ok) ;
+                    $("#Katin_symbol").text(ok);
+                } );
+            }
+            
+            // Get katin total supply
+            function getKatinTotalSupply() {
+                let contract = getTakinToken();
+                contract.methods.totalSupply().call().then( result => { 
+                    console.log('getKatinTotalSupply: ' + result) ;
+                    $("#Katin_total_supply").text( web3.utils.fromWei(result));
+                } );
+            }
+            
+            // Mint Km.
+            function katinMintKm() {
+                let contract = getTakinToken();
+                let amount = $("#mint_km_amount").val();
+                let addr = $("#mint_km_addr").val();
+                
+                console.log(amount, addr);
+
+                let options = {
+                  from: userAccount
+                }
+                contract.methods.mintKm(addr, amount).send(options).then( ok => { 
+                    console.log(ok) ;
+                    // $("#Katin_total_supply").text(ok.c[0]);
+                } );
+            }
+            
+            // Transfer katin
+            function _katinTransfer(amount, addr) {
+                let contract = getTakinToken();
+                
+                console.log(amount, addr);
+
+                let amountWei = web3.utils.toWei(amount)
+                let options = {
+                  from: userAccount
+                }
+                contract.methods.transfer(addr, amountWei).send(options).then( ok => { 
+                    console.log(ok);
+                } );
+            }
+            
+            // Transfer katin
+            function katinTransfer() {
+                let amount = $("#katin_transfer_amount").val();
+                let addr = $("#katin_transfer_addr").val();
+                _katinTransfer(amount, addr);
+            }
+            
+            // Get katin token contract
+            function getTakinToken() {
+                let abi = [ { "constant": true, "inputs": [], "name": "mintingFinished", "outputs": [ { "name": "", "type": "bool", "value": false } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "name", "outputs": [ { "name": "", "type": "string", "value": "KTT2" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "success", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [ { "name": "", "type": "uint256", "value": "6.02120000000000000001e+23" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "success", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "decimals", "outputs": [ { "name": "", "type": "uint8", "value": "18" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_to", "type": "address" }, { "name": "_km", "type": "uint256" } ], "name": "mintKm", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [ { "name": "_to", "type": "address" }, { "name": "_amount", "type": "uint256" } ], "name": "mint", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [ { "name": "who", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256", "value": "0" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [], "name": "finishMinting", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [ { "name": "", "type": "address", "value": "0x02219839ef94a1a857fe943f74d8297d7731a71f" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "symbol", "outputs": [ { "name": "", "type": "string", "value": "KTT2" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "name": "success", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" }, { "name": "", "type": "address" } ], "name": "allowance", "outputs": [ { "name": "", "type": "uint256", "value": "0" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "newOwner", "type": "address" } ], "name": "transferOwnership", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "name": "_name", "type": "string", "index": 0, "typeShort": "string", "bits": "", "displayName": "&thinsp;<span class=\"punctuation\">_</span>&thinsp;name", "template": "elements_input_string", "value": "KTT2" }, { "name": "_symbol", "type": "string", "index": 1, "typeShort": "string", "bits": "", "displayName": "&thinsp;<span class=\"punctuation\">_</span>&thinsp;symbol", "template": "elements_input_string", "value": "KTT2" }, { "name": "_decimals", "type": "uint8", "index": 2, "typeShort": "uint", "bits": "8", "displayName": "&thinsp;<span class=\"punctuation\">_</span>&thinsp;decimals", "template": "elements_input_uint", "value": "18" } ], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "to", "type": "address" }, { "indexed": false, "name": "value", "type": "uint256" } ], "name": "Mint", "type": "event" }, { "anonymous": false, "inputs": [], "name": "MintFinished", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "_owner", "type": "address" }, { "indexed": true, "name": "_spender", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "_from", "type": "address" }, { "indexed": true, "name": "_to", "type": "address" }, { "indexed": true, "name": "_value", "type": "uint256" }, { "indexed": false, "name": "_data", "type": "bytes" } ], "name": "Transfer", "type": "event" } ];
+
+                let contract = new web3.eth.Contract(abi, tokenAddr)
+                
+                return contract;
+            }
+        </script>
+        
+        <!-- Main contract -->
+        <script type="text/javascript">
+            // Get Main contract
+            function getMainContract() {
+                let abi = [ { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "proposals", "outputs": [ { "name": "", "type": "address", "value": "0x" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_proposal", "type": "address" } ], "name": "acceptProposal", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [ { "name": "_mainContract", "type": "address" }, { "name": "_token", "type": "address" }, { "name": "_goal", "type": "uint256" }, { "name": "_description", "type": "string" }, { "name": "_periodInMinutes", "type": "uint256" }, { "name": "_documentUrl", "type": "string" }, { "name": "_documentHash", "type": "string" } ], "name": "newProposal", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [ { "name": "", "type": "address", "value": "0x02219839ef94a1a857fe943f74d8297d7731a71f" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_index", "type": "uint256" }, { "name": "_documentUrl", "type": "string" }, { "name": "_documentHash", "type": "string" } ], "name": "updateProposalDeliveryFailed", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "proposalCount", "outputs": [ { "name": "", "type": "uint256", "value": "0" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "newOwner", "type": "address" } ], "name": "transferOwnership", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [ { "name": "_index", "type": "uint256" }, { "name": "_documentUrl", "type": "string" }, { "name": "_documentHash", "type": "string" } ], "name": "updateProposalDeliverySuccess", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "payable": true, "stateMutability": "payable", "type": "fallback" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "_sender", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" } ], "name": "EtherReceive", "type": "event" } ];
+                
+                let contract = new web3.eth.Contract(abi, mainContractAddr)
+                
+                return contract;
+            }
+            
+            // Get Main contract name
+            function getMainContractOwner() {
+                let contract = getMainContract();
+                contract.methods.owner().call().then( ok => { 
+                    console.log(ok) ;
+                    $("#main_contract_owner").text(ok);
+                } );
+            }
+            
+            // Get number of proposals
+            function getMainContractProposalCount( callback ) {
+                let contract = getMainContract();
+                contract.methods.proposalCount().call().then( result => { 
+                    console.log('getMainContractProposalCount: ' + result) ;
+                    callback(result);
+                } );
+            }
+
+            // Accept a propo9sal
+            function acceptProposal() {
+                let proposalAddr = $("#main_contract_accept_proposal_addr").val();
+                
+                let contract = getMainContract();
+
+                let options = {
+                  from: userAccount
+                }
+                contract.methods.acceptProposal(proposalAddr).send(options).then( ok => { 
+                    console.log(ok);
+                } );
+            }
+            
+            // New proposal
+            function newProposal() {
+                
+                let _goal = $("#new_proposal_goal").val();
+                let _description = $("#new_proposal_description").val();
+                let _periodInMinutes = $("#new_proposal_period_in_minutes").val();
+                let _documentUrl = $("#new_proposal_document_url").val();
+                let _documentHash = $("#new_proposal_document_hash").val();
+                            
+                let contract = getMainContract();
+                
+                let options = {
+                  from: userAccount
+                }
+                contract.methods.newProposal(
+                  mainContractAddr, 
+                  tokenAddr, 
+                  _goal, 
+                  _description, 
+                  _periodInMinutes, 
+                  _documentUrl, 
+                  _documentHash
+                ).send(options).then( ok => { 
+                    console.log(ok);
+                } );
+            }
+            
+            // Transfer ownership
+            function transferOwner() {
+                let addr = $("#main_contract_transfer_ownership_addr").val();
+                
+                let contract = getMainContract();
+
+                let options = {
+                  from: userAccount
+                }
+                contract.methods.transferOwnership(addr).send(options).then( ok => { 
+                    console.log(ok);
+                } );
+            }
+            
+        </script>
+            
+            
+        
+        <!-- Proposal contract -->
+        <script type="text/javascript">
+            
+            
+            // Get Proposal description
+            function getProposalDescription(addr, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.description().call().then( ok => { 
+                    console.log(ok);
+                    callback(ok);
+                } );
+            }
+            
+            // Get Proposal goal
+            function getProposalGoal(addr, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.goal().call().then( result => { 
+                    console.log(result);
+                    callback( web3.utils.fromWei(result) );
+                } );
+            }
+            
+            // Get Proposal progress
+            function getProposalProgress(addr, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.progress().call().then( result => { 
+                    console.log(result);
+                    callback( web3.utils.fromWei(result) );
+                } );
+            }
+            
+            // Get Proposal document url
+            function getProposalDocumentUrl(addr, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.documentUrl().call().then( ok => { 
+                    console.log(ok);
+                    callback(ok);
+                } );
+            }
+            
+            // Get Proposal document hash
+            function getProposalDocumentHash(addr, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.documentHash().call().then( ok => { 
+                    console.log(ok);
+                    callback(ok);
+                } );
+            }
+            
+            // Get Proposal status
+            function getProposalStatus(addr, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.status().call().then( ok => { 
+                    console.log(ok);
+                    if (0 == ok) {
+                        callback("Voting");
+                    } else if (1 == ok) {
+                        callback("Success");
+                    } else  if (2 == ok) {
+                        callback("Failed");
+                    } else {
+                        callback("Unknown");
+                    }
+                    
+                } );
+            }
+            
+            // Get Proposal vote
+            function getProposalVoter(addr, index, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.votes(index).call().then( ok => { 
+                    console.log('getProposalVoter: ' + ok);
+                    let voterAddr = ok[0];
+                    let amount = ok[1];
+                    callback(voterAddr, amount);
+                } );
+            }
+            
+            // Display Proposal voter
+            function displayProposalVoter(proposalIndex) {
+                let voterIndex = $("#proposal_" + proposalIndex + "_voter_index").val();
+
+                getProposalAddrAtIndex(proposalIndex, function (addr) {
+                    getProposalVoter(addr, voterIndex, function (voterAddr, amount) {
+                        console.log(voterAddr, amount);
+                        
+                        $("#proposal_" + proposalIndex + "_voter_index_address").text(voterAddr);
+                        $("#proposal_" + proposalIndex + "_voter_index_amount").text(amount);
+                    });
+                });
+            }
+            
+            // Get Proposal voter from address
+            function getProposalVoterAddr(addr, voterAddr, callback) {
+                let contract = getProposalContract(addr);
+                contract.methods.voteBy(voterAddr).call().then( ok => { 
+                    console.log('getProposalVoterAddr: ' +ok);
+                    callback(ok);
+                } );
+            }
+            
+            // Display Proposal voter from address
+            function displayProposalVoterAddr(proposalIndex) {
+                let voterAddr = $("#proposal_" + proposalIndex + "_voter_addr").val();
+
+                getProposalAddrAtIndex(proposalIndex, function (addr) {
+                    getProposalVoterAddr(addr, voterAddr, function (amount) {
+                        console.log(amount);
+                        
+                        $("#proposal_" + proposalIndex + "_voter_addr_amount").text(amount);
+                    });
+                });
+            }
+            
+            // Get proposal addr
+            function getProposalAddrAtIndex(index, callback) {
+                let contract = getMainContract();
+                contract.methods.proposals(index).call().then( ok => { 
+                    console.log(ok);
+                    callback(ok);
+                } );
+            }
+            
+            function displayProposal(index) {
+                getProposalAddrAtIndex(index, function (addr) {
+                    
+                    // Proposal address
+                    $("#proposal_" + index + "_addr").text(addr);
+                    
+                    // Proposal description
+                    getProposalDescription(addr, function(description) {
+                        $("#proposal_" + index + "_description").text(description);
+                    });
+                    
+                    // Proposal goal
+                    getProposalGoal(addr, function(goal) {
+                        $("#proposal_" + index + "_goal").text(goal);
+                    });
+                    
+                    // Proposal progress
+                    getProposalProgress(addr, function(progress) {
+                        $("#proposal_" + index + "_progress").text(progress);
+                    });
+                    
+                    // Proposal document url
+                    getProposalDocumentUrl(addr, function(documentUrl) {
+                        $("#proposal_" + index + "_document_url").text(documentUrl);
+                    });
+                    
+                    // Proposal document hash
+                    getProposalDocumentHash(addr, function(documentHash) {
+                        $("#proposal_" + index + "_document_hash").text(documentHash);
+                    });
+                    
+                    
+                    // Proposal status
+                    getProposalStatus(addr, function(status) {
+                        $("#proposal_" + index + "_status").text(status);
+                    });
+                });
+            }
+            
+            function cloneProposal(index) {
+                let a = $("#proposal_copy").clone();
+                $(a).find(".proposal_name").text("Proposal " + index);
+                $(a).find(".proposal_addr").attr("id", "proposal_" + index + "_addr");
+                $(a).find(".proposal_description").attr("id", "proposal_" + index + "_description");
+                $(a).find(".proposal_goal").attr("id", "proposal_" + index + "_goal");
+                $(a).find(".proposal_progress").attr("id", "proposal_" + index + "_progress");
+                $(a).find(".proposal_status").attr("id", "proposal_" + index + "_status");
+                $(a).find(".proposal_document_url").attr("id", "proposal_" + index + "_document_url");
+                $(a).find(".proposal_document_hash").attr("id", "proposal_" + index + "_document_hash");
+                $(a).find(".proposal_vote_amount").attr("id", "proposal_" + index + "_vote_amount");
+                $(a).find(".proposal_vote_button").attr("onClick", "javascript:voteForProposal(" + index + ");");
+                $(a).find(".proposal_verify_button").attr("onClick", "javascript:verifyProposal(" + index + ");");
+                
+                $(a).find(".proposal_voter_index").attr("id", "proposal_" + index + "_voter_index");
+                $(a).find(".proposal_voter_index_button").attr("onClick", "javascript:displayProposalVoter(" + index + ");");
+                $(a).find(".proposal_voter_index_address").attr("id", "proposal_" + index + "_voter_index_address");
+                $(a).find(".proposal_voter_index_amount").attr("id", "proposal_" + index + "_voter_index_amount");
+                
+                $(a).find(".proposal_voter_addr").attr("id", "proposal_" + index + "_voter_addr");
+                $(a).find(".proposal_voter_addr_button").attr("onClick", "javascript:displayProposalVoterAddr(" + index + ");");
+                $(a).find(".proposal_voter_addr_amount").attr("id", "proposal_" + index + "_voter_addr_amount");
+                        
+                $(a).appendTo("#more_proposals");
+            }
+            
+            // Show proposals information
+            function displayProposals() {
+                getMainContractProposalCount( function (count) {
+                    for (var i = 0; i < count; i++) {
+                        cloneProposal(i);
+                        displayProposal(i);
+                    }
+                });
+            }
+            
+            // Vote proposal
+            function voteForProposal(index) {
+                let amount = $("#proposal_" + index + "_vote_amount").val();
+                
+                getProposalAddrAtIndex(index, function (addr) {
+                    _katinTransfer(amount, addr);
+                });
+            }
+            
+            // Verify Proposal
+            function verifyProposal(index) {
+                getProposalAddrAtIndex(index, function (addr) {
+                    let contract = getProposalContract(addr);
+                    contract.methods.verify().call().then( ok => { 
+                        console.log(ok);
+                    } );
+                });
+            }
+            
+            // Get Proposal contract
+            function getProposalContract(addr) {
+                let abi = [{"constant":true,"inputs":[],"name":"votingDeadline","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deliveryStatus","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"status","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"documentUrl","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"goal","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"progress","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"votes","outputs":[{"name":"voter","type":"address"},{"name":"amount","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"description","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"periodInMinutes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"documentHash","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_voter","type":"address"}],"name":"voteBy","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_documentUrl","type":"string"},{"name":"_documentHash","type":"string"},{"name":"_status","type":"uint8"}],"name":"updateDelivery","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"deliveryDocUrl","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_sender","type":"address"},{"name":"_value","type":"uint256"},{"name":"_extraData","type":"bytes"}],"name":"tokenFallback","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"deliveryDocHash","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"voteCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"mainContract","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"token","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"verify","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_mainContract","type":"address"},{"name":"_token","type":"address"},{"name":"_goal","type":"uint256"},{"name":"_description","type":"string"},{"name":"_periodInMinutes","type":"uint256"},{"name":"_documentUrl","type":"string"},{"name":"_documentHash","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_sender","type":"address"},{"indexed":false,"name":"_value","type":"uint256"},{"indexed":false,"name":"_extraData","type":"bytes"}],"name":"TokenFallback","type":"event"}];
+                
+                let contract = new web3.eth.Contract(abi, addr)
+                
+                return contract;
+            }
+            
+        </script>
+            
+            
+            
+        </script>
+    
+    <style type="text/css">
+        .p_network {
+            border: 4px solid;
+            border-radius: 10px;
+            padding: 10px;
+            border-color: #2196F3;
+            text-align: center;
+            width: 11em;
+            margin: auto;
+        }
+        .p_warning {
+            padding: 10px;
+            text-align: center;
+            margin: auto;
+            color: red;
+        }
+        
+        table.info tr {
+            line-height: 2em;
+        }
+        
+        table.info .label {
+            width: 9em;
+        }
+    </style>
+    </head>
+    <body>
+        <p class="p_network">
+            <span>Network: </span>
+            <span id="eth_network"></span>
+        </p>
+        <p class="p_warning">
+          <span id="warning"></span>
+        </p>
+        
+        <!-- Token --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">Katin Token</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">name:</td><td><span id="Katin_name"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">symbol:</td><td><span id="Katin_symbol"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">owner:</td><td><span id="Katin_owner"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Total supply:</td><td><span id="Katin_total_supply"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        
+        <!-- Wallet --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">Wallet</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">account:</td><td><span id="eth_address"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">ether:</td><td><span id="balance"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Katin token:</td><td><span id="Katin_balance"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="clear:both;">
+            
+        </div>
+        
+        
+        <!-- Mint km --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">Mint km</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">
+                            <input type="text" name="mint_km_amount" id="mint_km_amount" placeholder="km."/>
+                            <input type="text" name="mint_km_addr" id="mint_km_addr" placeholder="address"/>
+                            <input type="button" value="Mint" name="Mint km." onClick="javascript:katinMintKm();" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Transfer Katin --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">Transfer katin</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">
+                            <input type="text" name="katin_transfer_amount" id="katin_transfer_amount" placeholder="amount"/>
+                            <input type="text" name="katin_transfer_addr" id="katin_transfer_addr" placeholder="address"/>
+                            <input type="button" value="Transfer katin" name="Transfer katin" onClick="javascript:katinTransfer();" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="clear:both;">
+            
+        </div>
+        
+        <!-- Main contract --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">Main contract</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">owner:</td><td><span id="main_contract_owner"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">proposals:</td><td><span id="main_contract_proposal_count"></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="main_contract_accept_proposal_addr" placeholder="proposal address"/></td>
+                        <td class="label"><input type="button" value="Accept" name="Accept" onClick="javascript:acceptProposal();" /></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="main_contract_transfer_ownership_addr" placeholder="Transfer ownership"/></td>
+                        <td class="label"><input type="button" value="Transfer" name="Transfer" onClick="javascript:transferOwner();" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- New Proposal --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">New Proposal</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">
+                            <input type="text" name="new_proposal_goal" id="new_proposal_goal" placeholder="goal"/>
+                            <input type="text" name="new_proposal_description" id="new_proposal_description" placeholder="description"/>
+                            <input type="text" name="new_proposal_period_in_minutes" id="new_proposal_period_in_minutes" placeholder="Period in minutes"/>
+                            <input type="text" name="new_proposal_document_url" id="new_proposal_document_url" placeholder="Document url"/>
+                            <input type="text" name="new_proposal_document_hash" id="new_proposal_document_hash" placeholder="Document hash"/>
+                            <input type="button" value="Create" name="Create" onClick="javascript:newProposal();" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="clear:both;">
+            
+        </div>
+        
+        <!-- Proposal copy --> 
+        <div style="display:none;">
+            <div id="proposal_copy" style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;" class="proposal_name">Proposal copy</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">address:</td><td><span class="proposal_addr"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">description:</td><td><span class="proposal_description"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">goal:</td><td><span class="proposal_goal"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">progress:</td><td><span class="proposal_progress"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">status:</td><td><span class="proposal_status"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">document url:</td><td><span class="proposal_document_url"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">document hash:</td><td><span class="proposal_document_hash"></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="proposal_vote_amount" placeholder="amount"/></td>
+                        <td class="label"><input class="proposal_vote_button" type="button" value="Vote" name="Vote" onClick="javascript:voteForProposal(xx);" /></td>
+                    </tr>
+                    <tr>
+                        <td class="label"><input class="proposal_verify_button" type="button" value="Verify proposal" name="Verify proposal" onClick="javascript:verifyProposal(xx);" /></td>
+                    </tr>
+                    <tr>
+                        <td><span style="color:#ffffff00; line-height: 25px;">empty space</span></td>
+                    </tr>
+                    <tr>
+                        <td><span>Vote history</span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="proposal_voter_index" placeholder="voter index"/></td>
+                        <td class="label"><input class="proposal_voter_index_button" type="button" value="Load" name="Load" onClick="javascript:displayProposalVoter(xx);" /></td>
+                    </tr>
+                    <tr>
+                        <td><span class="proposal_voter_index_address"></span></td>
+                        <td><span class="proposal_voter_index_amount"></span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="proposal_voter_addr" placeholder="voter address"/></td>
+                        <td class="label"><input class="proposal_voter_addr_button" type="button" value="Load" name="Load" onClick="javascript:displayProposalVoterAddr(xx);" /></td>
+                    </tr>
+                    <tr>
+                        <td><span class="proposal_voter_addr_amount"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+        
+        <div id="more_proposals">
+            
+        </div>
+        
+    </body>
+</html>

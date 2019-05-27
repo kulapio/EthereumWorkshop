@@ -7,6 +7,16 @@
 4. Mappings and Structs
 5. Inheritance & Deployment
 
+## Deploy Simple Voting
+- Copy content of file Smart contarct/SimpleVoting.sol
+- Open remix ide at https://remix.ethereum.org
+- New file and put the code from first step (Smart contarct/SimpleVoting.sol)
+- Click run
+- Expand deploy panel
+- candidateNames = ["Liverpool", "Manchester United", "Manchester City", "Arsenal"]
+- transact
+- Done!
+
 ## Deploy your own ERC-20 token
 - Copy content of file Smart contarct/ERC20Token.sol
 - Open remix ide at https://remix.ethereum.org

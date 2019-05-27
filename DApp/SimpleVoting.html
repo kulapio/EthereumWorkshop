@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="web3.js"></script>
+        <script type="text/javascript">
+            var contractAddress = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015';
+            var network = "";
+            var userAccount = '';
+            var warning = "";
+        </script>
+        <script type="text/javascript">
+          window.addEventListener('load', function() {
+
+              // Modern dapp browsers...
+              if (window.ethereum) {
+                  web3 = new Web3(ethereum);
+
+                  try { 
+                    // Request account access if needed
+                    ethereum.enable().then(result => {
+                      // Now you can start your app & access web3 freely:
+                      startApp()
+                    })
+                  }
+                  catch(err) {
+                    console.log(err);
+                  }
+              }
+              // Legacy dapp browsers, checking if Web3 has been injected by the browser (Mist/MetaMask)
+              else if (typeof web3 !== 'undefined') {
+                // Use Mist/MetaMask's provider
+                web3 = new Web3(web3.currentProvider);
+
+                // Now you can start your app & access web3 freely:
+                startApp();
+
+              } else {
+                console.log('No web3? You should consider trying MetaMask!')
+                // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+                web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
+
+                // Now you can start your app & access web3 freely:
+                startApp();
+              }
+            })
+        
+            
+            // Get current network
+            function startApp() {
+                web3.eth.net.getId().then(netId => {
+                // web3.version.getNetwork((err, netId) => {
+                  console.log('netId: ' + netId)
+                  switch (netId) {
+                    case 1:
+                        network = 'Mainnet';
+                        warning = 'please switch your network to Kovan';
+                      break
+                    case 2:
+                        network = 'Deprecated Morden';
+                        warning = 'please switch your network to Kovan';
+                      break
+                    case 3:
+                        network = 'Ropsten';
+                        warning = 'please switch your network to Kovan';
+                      break
+                    case 4:
+                        network = 'Rinkeby';
+                        warning = 'please switch your network to Kovan';
+                      break
+                    case 42:
+                        network = 'Kovan';
+                      break
+                    default:
+                        network = 'Unknown';
+                        warning = 'please switch your network to Kovan';
+                  }
+                  $("#eth_network").text(network);
+                  $("#warning").text(warning);
+                  
+                  
+                  web3.eth.getAccounts().then(accounts => {
+                    userAccount = accounts[0];
+                    $("#eth_address").text(userAccount);
+
+                    reloadInfo();
+                  })
+                })
+            }
+            
+            function reloadInfo() {
+
+                // Wallet
+                try { 
+                    getBalance();
+                    getKatinBalance();
+                }
+                catch(err) {
+                    console.log(err);
+                }
+                
+                showCandidateCount();
+                
+                // Candidate contract
+                displayCandidates();
+            }
+            
+            // Get block info
+            function getBlock() {
+                web3.eth.getBlock(48, function(error, result){
+                    if(!error) {
+                        console.log(JSON.stringify(result));
+                        $("#balance").html(JSON.stringify(result));
+                    } else {
+                        console.error(error);
+                    }
+                })
+            }
+            
+            // Get account balance
+            function getBalance() {
+              web3.eth.getBalance(userAccount).then(result => {
+                  $("#balance").html(web3.utils.fromWei(result));
+              }); // getbalance account
+            }
+            
+            // Get Katin name
+            function showCandidateCount() {
+                getCandidateCount( function (number) {
+                    console.log(number) ;
+                    $("#candidateCount").text(number);
+                } );
+            }
+
+            // Get katin token contract
+            function getVotingContract() {
+                let abi = [{"constant":false,"inputs":[{"name":"candidate","type":"string"}],"name":"voteForCandidate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"candidateNames","type":"string[]"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"candidateCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"candidateList","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"candidate","type":"string"}],"name":"totalVotesFor","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
+
+                let contract = new web3.eth.Contract(abi, contractAddress)
+                
+                return contract;
+            }
+        </script>
+        
+        <!-- Candidate contract -->
+        <script type="text/javascript">
+            // Get number of candidates
+            function getCandidateCount( callback ) {
+                let contract = getVotingContract();
+                contract.methods.candidateCount().call().then( result => { 
+                    console.log('getCandidateCount: ' + result) ;
+                    callback(result);
+                } );
+            }
+            
+            // Get Candidate name
+            function getCandidateName(index, callback) {
+                let contract = getVotingContract();
+                contract.methods.candidateList(index).call().then( name => { 
+                    console.log(name);
+                    callback(name);
+                } );
+            }
+
+            // Get Candidate total vote
+            function getCandidateTotalVote(index, callback) {
+                let contract = getVotingContract();
+                contract.methods.candidateList(index).call().then( name => { 
+                    contract.methods.totalVotesFor(name).call().then( ok => { 
+                        console.log(ok);
+                        callback(ok);
+                    });
+                });
+                
+            }
+            
+            // Vote
+            function voteAt(index) {
+                console.log('index', index);
+
+                let contract = getVotingContract();
+                contract.methods.candidateList(index).call().then( name => { 
+                    let options = {
+                        from: userAccount
+                    }
+                    contract.methods.voteForCandidate(name).send(options).then( ok => { 
+                        console.log(ok);
+
+                        // Refresh
+                        displayCandidateDetail(index);
+
+                        callback(ok);
+                    });
+                });
+            }
+            
+            // Load candidate detail
+            function displayCandidateDetail(index) {
+                // Name
+                getCandidateName(index, function(name) {
+                    $("#candidate_" + index + "_name").text(name);
+                });
+                
+                // Total vote
+                getCandidateTotalVote(index, function(total) {
+                    $("#candidate_" + index + "_total_vote").text(total);
+                });
+            }
+            
+            function cloneCandidateDetail(index) {
+                let a = $("#candidate_copy").clone();
+
+                $(a).find(".candidate_name").attr("id", "candidate_" + index + "_name");
+                $(a).find(".candidate_total_vote").attr("id", "candidate_" + index + "_total_vote");
+                $(a).find(".candidate_vote_button").attr("onClick", "javascript:voteAt(" + index + ");");
+                        
+                $(a).appendTo("#more_candidates");
+            }
+            
+            // Show candidates information
+            function displayCandidates() {
+                getCandidateCount( function (count) {
+                    for (var i = 0; i < count; i++) {
+                        cloneCandidateDetail(i);
+                        displayCandidateDetail(i);
+                    }
+                });
+            }
+            
+        </script>
+            
+            
+            
+        </script>
+    
+    <style type="text/css">
+        .p_network {
+            border: 4px solid;
+            border-radius: 10px;
+            padding: 10px;
+            border-color: #2196F3;
+            text-align: center;
+            width: 11em;
+            margin: auto;
+        }
+        .p_warning {
+            padding: 10px;
+            text-align: center;
+            margin: auto;
+            color: red;
+        }
+        
+        table.info tr {
+            line-height: 2em;
+        }
+        
+        table.info .label {
+            width: 9em;
+        }
+
+        .candidate_name {
+            font-size: 26px;
+        }
+
+        .candidate_vote_button {
+            background-color: white;
+            color: black;
+            border: 2px solid #4CAF50; /* Green */
+            font-size: 16px;
+            -webkit-transition-duration: 0.4s; /* Safari */
+            transition-duration: 0.4s;
+            padding: 12px 53px 12px 53px;
+            border-radius: 20px;
+            margin-top: 17px;
+        }
+
+        .candidate_vote_button:hover {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+    </style>
+    </head>
+    <body>
+        <p class="p_network">
+            <span>Network: </span>
+            <span id="eth_network"></span>
+        </p>
+        <p class="p_warning">
+          <span id="warning"></span>
+        </p>
+        
+        <!-- Candidate --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">Candidate</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">Count:</td><td><span id="candidateCount"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        
+        <!-- Wallet --> 
+        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;">Wallet</span>
+            <table class="info">
+                <tbody>
+                    <tr>
+                        <td class="label">account:</td><td><span id="eth_address"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">ether:</td><td><span id="balance"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="clear:both;">
+            
+        </div>
+        
+        <!-- Candidate copy --> 
+        <div style="display:none;">
+            <div id="candidate_copy" style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
+            <span style="text-align: center;display: block;" class="candidate_name">candidate copy</span>
+            <table class="info" style="margin-top: 15px;">
+                <tbody>
+                    <tr>
+                        <td class="label">Total votes:</td><td><span class="candidate_total_vote"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="label"><input class="candidate_vote_button" type="button" value="Vote" name="Vote" onClick="javascript:voteAt(xx);" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+        
+        <div id="more_candidates">
+            
+        </div>
+        
+    </body>
+</html>
