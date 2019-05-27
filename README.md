@@ -34,6 +34,9 @@
 - Open http://localhost:8080
 - Click "SimpleVoting.html"
 
+### Live demo here
+- [https://dev.kulap.io/workshop/smartcontract/simplevote/SimpleVoting.html](https://dev.kulap.io/workshop/smartcontract/simplevote/SimpleVoting.html)
+
 ## Deploy your own ERC-20 token
 - Copy content of file Smart contarct/ERC20Token.sol
 - Open remix ide at https://remix.ethereum.org
