@@ -17,6 +17,23 @@
 - transact
 - Done!
 
+## Run Simple Voting
+- We need webserver to run our DApp so we have 2 simple solutions here.
+
+### First solution - Chrome extension
+- Install chrome extesion https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb?hl=en
+- Open
+- Choose folder
+- Select "DApp"
+- Open http://127.0.0.1:8887 (link in Web Server URL)
+- Click "SimpleVoting.html"
+
+### Second solution - use python
+- cd DApp/
+- run: python -m SimpleHTTPServer 8080
+- Open http://localhost:8080
+- Click "SimpleVoting.html"
+
 ## Deploy your own ERC-20 token
 - Copy content of file Smart contarct/ERC20Token.sol
 - Open remix ide at https://remix.ethereum.org
