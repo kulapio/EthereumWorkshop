@@ -184,14 +184,23 @@
                     let options = {
                         from: userAccount
                     }
-                    contract.methods.voteForCandidate(name).send(options).then( ok => { 
-                        console.log(ok);
+                    contract.methods.voteForCandidate(name).send(options)
+                    .on('error', (error) => { console.error(error) })
+                    .on('transactionHash', (transactionHash) => { 
+                      // Show tx hash
+                      console.log(transactionHash)
+                      let link = "https://" + network.toLowerCase() + ".etherscan.io/tx/" + transactionHash
+                      $("#tx_link").attr("href", link)
+                      $("#tx_link").text(link)
+                     })
+                    .on('receipt', (receipt) => {
+                      console.log(ok);
 
-                        // Refresh
-                        displayCandidateDetail(index);
+                      // Refresh
+                      displayCandidateDetail(index);
 
-                        callback(ok);
-                    });
+                      callback(ok);
+                    })
                 });
             }
             
@@ -285,6 +294,7 @@
         .candidate_vote_button:hover {
             background-color: #4CAF50; /* Green */
             color: white;
+            cursor: pointer;
         }
     </style>
     </head>
@@ -337,22 +347,33 @@
         <!-- Candidate copy --> 
         <div style="display:none;">
             <div id="candidate_copy" style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
-            <span style="text-align: center;display: block;" class="candidate_name">candidate copy</span>
-            <table class="info" style="margin-top: 15px;">
-                <tbody>
-                    <tr>
-                        <td class="label">Total votes:</td><td><span class="candidate_total_vote"></span></td>
-                    </tr>
-                    <tr>
-                        <td class="label"><input class="candidate_vote_button" type="button" value="Vote" name="Vote" onClick="javascript:voteAt(xx);" /></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <span style="text-align: center;display: block;" class="candidate_name">candidate copy</span>
+                <table class="info" style="margin-top: 15px;">
+                    <tbody>
+                        <tr>
+                            <td class="label">Total votes:</td><td><span class="candidate_total_vote"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="label"><input class="candidate_vote_button" type="button" value="Vote" name="Vote" onClick="javascript:voteAt(xx);" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         
         <div id="more_candidates">
             
+        </div>
+
+        <div style="clear:both;">
+            
+        </div>
+
+        <div id="transaction">
+            <span>Your pending transaction: </span>
+            <span>
+                <a id="tx_link" target="_blank" href="https://kovan.etherscan.io/tx/0x56e2c8c7b027ad3227e90d0febcea6213c9ff39c5e61aace55cde6a797675013">https://kovan.etherscan.io/tx/0x56e2c8c7b027ad3227e90d0febcea6213c9ff39c5e61aace55cde6a797675013</a>
+            </span>
         </div>
         
     </body>
