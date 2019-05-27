@@ -32,4 +32,8 @@ contract Voting {
   function voteForCandidate(string memory candidate) public {
     votesReceived[candidate] += 1;
   }
+  
+  function candidateCount() public view returns (uint256) {
+      return candidateList.length;
+  }
 }
