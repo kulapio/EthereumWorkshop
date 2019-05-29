@@ -184,8 +184,12 @@
                     let options = {
                         from: userAccount
                     }
+
+                    // Send a transaction to blockchain
                     contract.methods.voteForCandidate(name).send(options)
                     .on('error', (error) => { console.error(error) })
+
+                    // Transaction already saved to mempool
                     .on('transactionHash', (transactionHash) => { 
                       // Show tx hash
                       console.log(transactionHash)
@@ -193,6 +197,8 @@
                       $("#tx_link").attr("href", link)
                       $("#tx_link").text(link)
                     })
+
+                    // Transaction got confirmed
                     .on('confirmation', (confirmationNumber, receipt) => {
                         console.log('confirmationNumber', confirmationNumber)
                         console.log(receipt);
