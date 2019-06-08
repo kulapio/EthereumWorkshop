@@ -193,7 +193,7 @@
                       $("#status_value").text('Failed').css("color", "red");
 
                       // Hide progress bar
-                      $("#candidate_" + index + "_progress").css('display', 'none');
+                      $("#candidate_" + index + "_progress").slideUp();
                     })
 
                     // Transaction already saved to mempool
@@ -208,7 +208,7 @@
                       $("#status_value").text('-');
 
                       // Show progress bar
-                      $("#candidate_" + index + "_progress").css('display', 'block');
+                      $("#candidate_" + index + "_progress").slideDown();
                     })
 
                     // Transaction got confirmed
@@ -221,7 +221,7 @@
                         displayCandidateDetail(index);
 
                         // Hide progress bar
-                        $("#candidate_" + index + "_progress").css('display', 'none');
+                        $("#candidate_" + index + "_progress").slideUp();
 
                         callback(ok);
                     })
