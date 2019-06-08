@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
+        <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="web3.js"></script>
         <script type="text/javascript">
@@ -259,6 +261,7 @@
             text-align: center;
             width: 11em;
             margin: auto;
+            margin-top: 20px;
         }
         .p_warning {
             padding: 10px;
@@ -278,34 +281,35 @@
             line-height: 2em;
         }
         
-        table.info .label {
-            width: 9em;
+        table.info .table-label {
+            width: 10em;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+
+        table.info .table-value {
+          word-break: break-all;
         }
 
         .candidate_name {
             font-size: 26px;
         }
 
-        .candidate_vote_button {
-            background-color: white;
-            color: black;
-            border: 2px solid #4CAF50; /* Green */
-            font-size: 16px;
-            -webkit-transition-duration: 0.4s; /* Safari */
-            transition-duration: 0.4s;
-            padding: 12px 53px 12px 53px;
-            border-radius: 20px;
-            margin-top: 17px;
-        }
-
-        .candidate_vote_button:hover {
-            background-color: #4CAF50; /* Green */
-            color: white;
-            cursor: pointer;
+        .candidate_total_vote {
+          font-size: 50px;
         }
     </style>
     </head>
     <body>
+        <section class="hero is-primary">
+          <div class="hero-body">
+            <div class="container">
+              <h1 class="title">
+                Simple Voting DApp
+              </h1>
+            </div>
+          </div>
+        </section>
         <p class="p_network">
             <span>Network: </span>
             <span id="eth_network"></span>
@@ -313,38 +317,43 @@
         <p class="p_warning">
           <span id="warning"></span>
         </p>
-
-        <h1 class="title">Simple Voting DApp</h1>
         
         <!-- Candidate --> 
-        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
-            <span style="text-align: center;display: block;">Candidate</span>
-            <table class="info">
+        <div class="tile is-ancestor" style="margin-left: 10px; margin-right: 10px;">
+          <div class="tile is-parent">
+            <article class="tile is-child box notification is-info">
+              <p class="title">Candidate</p>
+                <table class="info">
+                  <tbody>
+                    <tr>
+                      <td class="table-label">Contract address:</td>
+                      <td class="table-value"><span id="candidateContractAddress"></span></td>
+                    </tr>
+                    <tr>
+                      <td class="table-label">Count:</td>
+                      <td class="table-value"><span id="candidateCount"></span></td>
+                    </tr>
+                  </tbody>
+                </table>
+            </article>
+          </div>
+          <div class="tile is-parent">
+            <article class="tile is-child box notification is-info">
+              <p class="title">Wallet</p>
+              <table class="info">
                 <tbody>
-                    <tr>
-                        <td class="label">Contract address:</td><td><span id="candidateContractAddress"></span></td>
-                    </tr>
-                    <tr>
-                        <td class="label">Count:</td><td><span id="candidateCount"></span></td>
-                    </tr>
+                  <tr>
+                    <td class="table-label">account:</td>
+                    <td class="table-value"><span id="eth_address"></span></td>
+                  </tr>
+                  <tr>
+                    <td class="table-label">ether:</td>
+                    <td class="table-value"><span id="balance"></span></td>
+                  </tr>
                 </tbody>
-            </table>
-        </div>
-        
-        
-        <!-- Wallet --> 
-        <div style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
-            <span style="text-align: center;display: block;">Wallet</span>
-            <table class="info">
-                <tbody>
-                    <tr>
-                        <td class="label">account:</td><td><span id="eth_address"></span></td>
-                    </tr>
-                    <tr>
-                        <td class="label">ether:</td><td><span id="balance"></span></td>
-                    </tr>
-                </tbody>
-            </table>
+              </table>
+            </article>
+          </div>
         </div>
         
         <div style="clear:both;">
@@ -353,23 +362,21 @@
         
         <!-- Candidate copy --> 
         <div style="display:none;">
-            <div id="candidate_copy" style="border: 1px solid;padding: 1em;border-radius: 1em;margin: 2em;float: left;">
-                <span style="text-align: center;display: block;" class="candidate_name">candidate copy</span>
-                <table class="info" style="margin-top: 15px;">
-                    <tbody>
-                        <tr>
-                            <td class="label">Total votes:</td><td><span class="candidate_total_vote"></span></td>
-                        </tr>
-                        <tr>
-                            <td class="label"><input class="candidate_vote_button" type="button" value="Vote" name="Vote" onClick="javascript:voteAt(xx);" /></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+          <div id="candidate_copy" class="tile is-parent">
+            <article class="tile is-child box notification is-info">
+              <p class="title candidate_name">candidate copy</p>
+              <p style="margin: 0 auto; width: fit-content;">
+                <span class="candidate_total_vote">12</span>
+              </p>
+              <p style="margin: 0 auto; width: fit-content; margin-top: 10px;">
+                <button class="candidate_vote_button button is-large is-success is-rounded" onClick="javascript:voteAt(xx);">Vote</button>
+              </p>
+            </article>
+          </div>
         </div>
         
-        <div id="more_candidates">
-            
+        <div id="more_candidates" class="tile is-ancestor" style="margin-left: 10px; margin-right: 10px;">
+
         </div>
 
         <div style="clear:both;">
