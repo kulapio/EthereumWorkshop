@@ -55,30 +55,29 @@
                   switch (netId) {
                     case 1:
                         network = 'Mainnet';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Ropsten or Rinkeby';
                       break
                     case 2:
                         network = 'Deprecated Morden';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Ropsten or Rinkeby';
                       break
                     case 3:
                         network = 'Ropsten';
-                        warning = 'please switch your network to Kovan';
                         tokenAddr =         '0x95477082106ad76ec820a5e6bf8e35055003fd21';
                         mainContractAddr =  '0x2ae53961e6cad27ed6ef71c4b1e6021786d7846b';
                       break
                     case 4:
                         network = 'Rinkeby';
-                        warning = 'please switch your network to Kovan';
                         tokenAddr =         '0x1Fb1670E4Ba34238cF16e5491eE6B2C436b52B38';
                         mainContractAddr =  '0x4c94e3771998ae3791e35140f16a721ebf1c1019';
                       break
                     case 42:
                         network = 'Kovan';
+                        warning = 'please switch your network to Ropsten or Rinkeby';
                       break
                     default:
                         network = 'Unknown';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Ropsten or Rinkeby';
                   }
                   $("#eth_network").text(network);
                   $("#warning").text(warning);
