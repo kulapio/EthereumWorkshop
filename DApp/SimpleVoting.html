@@ -80,7 +80,7 @@
                   }
                   $("#eth_network").text(network);
                   $("#warning").text(warning);
-                  $("#candidateContractAddress").text(contractAddress);
+                  $("#candidateContractAddress").val(contractAddress);
                   
                   
                   web3.eth.getAccounts().then(accounts => {
@@ -97,7 +97,6 @@
                 // Wallet
                 try { 
                     getBalance();
-                    getKatinBalance();
                 }
                 catch(err) {
                     console.log(err);
@@ -261,6 +260,21 @@
                     }
                 });
             }
+
+            function reloadCandidateContract() {
+              let newContractAddress = $("#candidateContractAddress").val()
+              if (!web3.utils.isAddress(newContractAddress)) {
+                console.error(newContractAddress + ' is not a valid address!')
+                return;
+              }
+
+              // Clear candidates
+              $("#more_candidates").html('')
+
+              // Fetch candidates from new contract
+              contractAddress = newContractAddress;
+              reloadInfo()
+            }
             
         </script>
             
@@ -344,7 +358,10 @@
                   <tbody>
                     <tr>
                       <td class="table-label">Contract address:</td>
-                      <td class="table-value"><span id="candidateContractAddress"></span></td>
+                      <td class="table-value">
+                        <input id="candidateContractAddress" class="input is-rounded" style="width:27em;" type="text" placeholder="Rounded input" />
+                        <button class="candidate_vote_button button is-warning is-success is-rounded" style="font-size:16px;" onClick="javascript:reloadCandidateContract();">Load</button>
+                      </td>
                     </tr>
                     <tr>
                       <td class="table-label">Count:</td>
