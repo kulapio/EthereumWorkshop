@@ -34,6 +34,16 @@
 - Open http://localhost:8080
 - Click "SimpleVoting.html"
 
+### Third solution - use docker
+```sh
+#!/bin/sh
+set -x
+docker rm -f simplevote
+docker run --name simplevote -p 8080:80 -v $PWD/DApp:/usr/share/nginx/html:ro -d nginx:alpine
+set +x
+echo "Go to http://localhost:8080/SimpleVoting.html"
+```
+
 ### Live demo here
 - [https://dev.kulap.io/workshop/smartcontract/simplevote/SimpleVoting.html](https://dev.kulap.io/workshop/smartcontract/simplevote/SimpleVoting.html)
 
