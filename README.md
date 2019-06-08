@@ -25,7 +25,7 @@
 - Open
 - Choose folder
 - Select "DApp"
-- Open http://127.0.0.1:8887 (link in Web Server URL)
+- Open http://127.0.0.1:8887 (open the link on web server url)
 - Click "SimpleVoting.html"
 
 ### Second solution - use python
