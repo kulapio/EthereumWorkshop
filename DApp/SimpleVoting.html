@@ -10,6 +10,7 @@
             var network = "";
             var userAccount = '';
             var warning = "";
+            let abi = [{"constant":false,"inputs":[{"name":"candidate","type":"string"}],"name":"voteForCandidate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"candidateNames","type":"string[]"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"candidateCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"candidateList","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"candidate","type":"string"}],"name":"totalVotesFor","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
         </script>
         <script type="text/javascript">
           window.addEventListener('load', function() {
@@ -137,8 +138,6 @@
 
             // Get katin token contract
             function getVotingContract() {
-                let abi = [{"constant":false,"inputs":[{"name":"candidate","type":"string"}],"name":"voteForCandidate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"candidateNames","type":"string[]"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"candidateCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"candidateList","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"candidate","type":"string"}],"name":"totalVotesFor","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
-
                 let contract = new web3.eth.Contract(abi, contractAddress)
                 
                 return contract;
@@ -189,7 +188,13 @@
 
                     // Send a transaction to blockchain
                     contract.methods.voteForCandidate(name).send(options)
-                    .on('error', (error) => { console.error(error) })
+                    .on('error', (error) => { 
+                      console.error(error) 
+                      $("#status_value").text('Failed').css("color", "red");
+
+                      // Hide progress bar
+                      $("#candidate_" + index + "_progress").css('display', 'none');
+                    })
 
                     // Transaction already saved to mempool
                     .on('transactionHash', (transactionHash) => { 
@@ -198,15 +203,25 @@
                       let link = "https://" + network.toLowerCase() + ".etherscan.io/tx/" + transactionHash
                       $("#tx_link").attr("href", link)
                       $("#tx_link").text(link)
+
+                      // Clear status
+                      $("#status_value").text('-');
+
+                      // Show progress bar
+                      $("#candidate_" + index + "_progress").css('display', 'block');
                     })
 
                     // Transaction got confirmed
                     .on('confirmation', (confirmationNumber, receipt) => {
                         console.log('confirmationNumber', confirmationNumber)
                         console.log(receipt);
+                        $("#status_value").text('Success').css("color", "green");
 
                         // Refresh
                         displayCandidateDetail(index);
+
+                        // Hide progress bar
+                        $("#candidate_" + index + "_progress").css('display', 'none');
 
                         callback(ok);
                     })
@@ -232,6 +247,7 @@
                 $(a).find(".candidate_name").attr("id", "candidate_" + index + "_name");
                 $(a).find(".candidate_total_vote").attr("id", "candidate_" + index + "_total_vote");
                 $(a).find(".candidate_vote_button").attr("onClick", "javascript:voteAt(" + index + ");");
+                $(a).find(".candidate_progress").attr("id", "candidate_" + index + "_progress");
                         
                 $(a).appendTo("#more_candidates");
             }
@@ -273,7 +289,7 @@
         .title {
             text-align: center;
             margin: auto;
-            margin-top: 20px;
+            margin-top: 9px;
             margin-bottom: 20px;
         }
         
@@ -293,6 +309,7 @@
 
         .candidate_name {
             font-size: 26px;
+            margin-bottom: 16px;
         }
 
         .candidate_total_vote {
@@ -368,8 +385,11 @@
               <p style="margin: 0 auto; width: fit-content;">
                 <span class="candidate_total_vote">12</span>
               </p>
-              <p style="margin: 0 auto; width: fit-content; margin-top: 10px;">
+              <p style="margin: 0 auto; width: fit-content; margin-top: 20px;">
                 <button class="candidate_vote_button button is-large is-success is-rounded" onClick="javascript:voteAt(xx);">Vote</button>
+              </p>
+              <p class="candidate_progress" style="margin-top: 12px;display:none;">
+                <progress class="progress is-primary" max="100">30%</progress>
               </p>
             </article>
           </div>
@@ -384,10 +404,18 @@
         </div>
 
         <div id="transaction">
+          <p>
             <span>Your pending transaction: </span>
             <span>
-                <a id="tx_link" target="_blank" href="https://dev.kulap.io/landing/">-</a>
+              <a id="tx_link" target="_blank" href="https://dev.kulap.io/landing/">-</a>
             </span>
+          </p>
+          <p>
+              <span>Status: </span>
+              <span id="status_value">
+                -
+              </span>
+            </p>
         </div>
         
     </body>
