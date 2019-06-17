@@ -6,11 +6,9 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="web3.js"></script>
         <script type="text/javascript">
-            var contractAddress = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015';
             var network = "";
             var userAccount = '';
             var warning = "";
-            let abi = [{"constant":false,"inputs":[{"name":"candidate","type":"string"}],"name":"voteForCandidate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"candidateNames","type":"string[]"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"candidateCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"candidateList","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"candidate","type":"string"}],"name":"totalVotesFor","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
         </script>
         <script type="text/javascript">
           window.addEventListener('load', function() {
@@ -80,12 +78,11 @@
                   }
                   $("#eth_network").text(network);
                   $("#warning").text(warning);
-                  $("#candidateContractAddress").val(contractAddress);
-                  
                   
                   web3.eth.getAccounts().then(accounts => {
                     userAccount = accounts[0];
                     $("#eth_address").text(userAccount);
+                    $("#fromAddress").val(userAccount);
 
                     reloadInfo();
                   })
@@ -101,11 +98,6 @@
                 catch(err) {
                     console.log(err);
                 }
-                
-                showCandidateCount();
-                
-                // Candidate contract
-                displayCandidates();
             }
             
             // Get block info
@@ -126,167 +118,10 @@
                   $("#balance").html(web3.utils.fromWei(result));
               }); // getbalance account
             }
-            
-            // Get Katin name
-            function showCandidateCount() {
-                getCandidateCount( function (number) {
-                    console.log(number) ;
-                    $("#candidateCount").text(number);
-                } );
-            }
-
-            // Get katin token contract
-            function getVotingContract() {
-                let contract = new web3.eth.Contract(abi, contractAddress)
-                
-                return contract;
-            }
         </script>
         
-        <!-- Candidate contract -->
+        <!-- Ether transfer -->
         <script type="text/javascript">
-            // Get number of candidates
-            function getCandidateCount( callback ) {
-                let contract = getVotingContract();
-                contract.methods.candidateCount().call().then( result => { 
-                    console.log('getCandidateCount: ' + result) ;
-                    callback(result);
-                } );
-            }
-            
-            // Get Candidate name
-            function getCandidateName(index, callback) {
-                let contract = getVotingContract();
-                contract.methods.candidateList(index).call().then( name => { 
-                    console.log(name);
-                    callback(name);
-                } );
-            }
-
-            // Get Candidate total vote
-            function getCandidateTotalVote(index, callback) {
-                let contract = getVotingContract();
-                contract.methods.candidateList(index).call().then( name => { 
-                    contract.methods.totalVotesFor(name).call().then( ok => { 
-                        console.log(ok);
-                        callback(ok);
-                    });
-                });
-                
-            }
-            
-            // Vote
-            function voteAt(index) {
-                console.log('index', index);
-
-                let contract = getVotingContract();
-                contract.methods.candidateList(index).call().then( name => { 
-                    let options = {
-                        from: userAccount
-                    }
-
-                    // Send a transaction to blockchain
-                    contract.methods.voteForCandidate(name).send(options)
-                    .on('error', (error) => { 
-                      console.error(error) 
-                      $("#status_value").text('Failed').css("color", "red");
-
-                      // Hide progress bar
-                      $("#candidate_" + index + "_progress").slideUp();
-                    })
-
-                    // Transaction already saved to mempool
-                    .on('transactionHash', (transactionHash) => { 
-                      // Show tx hash
-                      console.log(transactionHash)
-                      let link = "https://" + network.toLowerCase() + ".etherscan.io/tx/" + transactionHash
-                      $("#tx_link").attr("href", link)
-                      $("#tx_link").text(link)
-
-                      // Clear status
-                      $("#status_value").text('-');
-
-                      // Show progress bar
-                      $("#candidate_" + index + "_progress").slideDown();
-                    })
-
-                    // Transaction got confirmed
-                    .on('confirmation', (confirmationNumber, receipt) => {
-                        console.log('confirmationNumber', confirmationNumber)
-                        console.log(receipt);
-                        $("#status_value").text('Success').css("color", "green");
-
-                        // Refresh
-                        displayCandidateDetail(index);
-
-                        // Hide progress bar
-                        $("#candidate_" + index + "_progress").slideUp();
-
-                        callback(ok);
-                    })
-                });
-            }
-            
-            // Load candidate detail
-            function displayCandidateDetail(index) {
-                // Name
-                getCandidateName(index, function(name) {
-                    $("#candidate_" + index + "_name").text(name);
-                });
-                
-                // Total vote
-                getCandidateTotalVote(index, function(total) {
-                    $("#candidate_" + index + "_total_vote").text(total);
-                });
-            }
-            
-            function cloneCandidateDetail(index) {
-                let a = $("#candidate_copy").clone();
-
-                $(a).find(".candidate_name").attr("id", "candidate_" + index + "_name");
-                $(a).find(".candidate_total_vote").attr("id", "candidate_" + index + "_total_vote");
-                $(a).find(".candidate_vote_button").attr("onClick", "javascript:voteAt(" + index + ");");
-                $(a).find(".candidate_progress").attr("id", "candidate_" + index + "_progress");
-                        
-                $(a).appendTo("#more_candidates");
-            }
-            
-            // Show candidates information
-            function displayCandidates() {
-                getCandidateCount( function (count) {
-                    for (var i = 0; i < count; i++) {
-                        cloneCandidateDetail(i);
-                        displayCandidateDetail(i);
-                    }
-                });
-            }
-
-            function reloadCandidateContract() {
-              let newContractAddress = $("#candidateContractAddress").val()
-              if (!web3.utils.isAddress(newContractAddress)) {
-                console.error(newContractAddress + ' is not a valid address!')
-                return;
-              }
-
-              // Clear candidates
-              $("#more_candidates").html('')
-
-              // Fetch candidates from new contract
-              contractAddress = newContractAddress;
-              reloadInfo()
-            }
-
-            function openContractOnEtherScan() {
-              let address = $("#candidateContractAddress").val()
-              let url = 'https://kovan.etherscan.io/address/' + address
-              window.open(url,'_blank');
-            }
-
-            function openUserAddressOnEtherScan() {
-              let url = 'https://kovan.etherscan.io/address/' + userAccount
-              window.open(url,'_blank');
-            }
-
             function etherTransfer() {
               let toAddress = $("#toAddress").val()
               let amountInText = $("#amount").val()
@@ -306,9 +141,6 @@
               .on('error', (error) => { 
                 console.error(error) 
                 $("#status_value").text('Failed').css("color", "red");
-
-                // Hide progress bar
-                $("#candidate_" + index + "_progress").slideUp();
               })
 
               // Transaction already saved to mempool
@@ -321,9 +153,6 @@
 
                 // Clear status
                 $("#status_value").text('-');
-
-                // Show progress bar
-                $("#candidate_" + index + "_progress").slideDown();
               })
 
               // Transaction got confirmed
@@ -332,70 +161,51 @@
                   console.log(receipt);
                   $("#status_value").text('Success').css("color", "green");
 
-                  // Refresh
-                  displayCandidateDetail(index);
-
-                  // Hide progress bar
-                  $("#candidate_" + index + "_progress").slideUp();
-
                   callback(ok);
               })
             }
             
         </script>
-            
-            
-            
-        </script>
-    
-    <style type="text/css">
-        .p_network {
-            border: 4px solid;
-            border-radius: 10px;
-            padding: 10px;
-            border-color: #2196F3;
-            text-align: center;
-            width: 11em;
-            margin: auto;
-            margin-top: 20px;
-        }
-        .p_warning {
-            padding: 10px;
-            text-align: center;
-            margin: auto;
-            color: red;
-        }
+      
+        <style type="text/css">
+          .p_network {
+              border: 4px solid;
+              border-radius: 10px;
+              padding: 10px;
+              border-color: #2196F3;
+              text-align: center;
+              width: 11em;
+              margin: auto;
+              margin-top: 20px;
+          }
+          .p_warning {
+              padding: 10px;
+              text-align: center;
+              margin: auto;
+              color: red;
+          }
 
-        .title {
-            text-align: center;
-            margin: auto;
-            margin-top: 9px;
-            margin-bottom: 20px;
-        }
-        
-        table.info tr {
-            line-height: 2em;
-        }
-        
-        table.info .table-label {
-            width: 10em;
-            margin-right: 20px;
-            font-weight: bold;
-        }
+          .title {
+              text-align: center;
+              margin: auto;
+              margin-top: 9px;
+              margin-bottom: 20px;
+          }
+          
+          table.info tr {
+              line-height: 2em;
+          }
+          
+          table.info .table-label {
+              width: 10em;
+              margin-right: 20px;
+              font-weight: bold;
+          }
 
-        table.info .table-value {
-          word-break: break-all;
-        }
-
-        .candidate_name {
-            font-size: 26px;
-            margin-bottom: 16px;
-        }
-
-        .candidate_total_vote {
-          font-size: 50px;
-        }
-    </style>
+          table.info .table-value {
+            word-break: break-all;
+          }
+        </style>
     </head>
     <body>
         <section class="hero is-primary">
@@ -415,11 +225,18 @@
           <span id="warning"></span>
         </p>
         
-        <!-- Candidate --> 
+        <!-- Ether transfer --> 
         <div class="tile is-ancestor" style="margin-left: 10px; margin-right: 10px;">
           <div class="tile is-parent">
             <article class="tile is-child box notification is-info">
               <p class="title">Transfer</p>
+                <div class="field">
+                  <label class="label">From</label>
+                  <div class="control">
+                    <input disabled="disabled" id="fromAddress" class="input" type="text" placeholder="from address" value="0x950807aeaCCb5E66DC09e9F99A7d559A880D8b14">
+                  </div>
+                </div>
+
                 <div class="field">
                   <label class="label">To</label>
                   <div class="control">
@@ -438,12 +255,6 @@
                   <div class="control">
                     <button class="button is-link" onclick="javascript:etherTransfer()">Submit</button>
                   </div>
-                  <div class="control">
-                    <button class="button is-text">Cancel</button>
-                  </div>
-                  <p class="candidate_progress" style="margin-top: 12px">
-                    <progress class="progress is-primary" max="100">30%</progress>
-                  </p>
                 </div>
               </p>
             </article>
