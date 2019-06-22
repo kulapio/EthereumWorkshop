@@ -41,7 +41,8 @@
               } else {
                 console.log('No web3? You should consider trying MetaMask!')
                 // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-                web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
+                // web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
+                web3 = new Web3( new Web3.providers.HttpProvider( "https://rpc.tch.in.th" ));
 
                 // Now you can start your app & access web3 freely:
                 startApp();
@@ -57,26 +58,30 @@
                   switch (netId) {
                     case 1:
                         network = 'Mainnet';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Kovan or Thai Chain';
                       break
                     case 2:
                         network = 'Deprecated Morden';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Kovan or Thai Chain';
                       break
                     case 3:
                         network = 'Ropsten';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Kovan or Thai Chain';
                       break
                     case 4:
                         network = 'Rinkeby';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Kovan or Thai Chain';
+                      break
+                    case 7:
+                        network = 'Thai Chain';
+                        contractAddress = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6';
                       break
                     case 42:
                         network = 'Kovan';
                       break
                     default:
                         network = 'Unknown';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Kovan or Thai Chain';
                   }
                   $("#eth_network").text(network);
                   $("#warning").text(warning);
@@ -417,9 +422,9 @@
         <div style="display:none;">
           <div id="candidate_copy" class="tile is-parent">
             <article class="tile is-child box notification is-info">
-              <p class="title candidate_name">candidate copy</p>
+              <p class="title candidate_name">Name</p>
               <p style="margin: 0 auto; width: fit-content;">
-                <span class="candidate_total_vote">12</span>
+                <span class="candidate_total_vote">0</span>
               </p>
               <p style="margin: 0 auto; width: fit-content; margin-top: 20px;">
                 <button class="candidate_vote_button button is-large is-success is-rounded" onClick="javascript:voteAt(xx);">Vote</button>
