@@ -204,7 +204,13 @@
                     .on('transactionHash', (transactionHash) => { 
                       // Show tx hash
                       console.log(transactionHash)
-                      let link = "https://" + network.toLowerCase() + ".etherscan.io/tx/" + transactionHash
+
+                      let link
+                      if ('Thai Chain' == network) {
+                        link = "https://exp.tch.in.th/tx/" + transactionHash
+                      } else {
+                        link = "https://" + network.toLowerCase() + ".etherscan.io/tx/" + transactionHash
+                      }
                       $("#tx_link").attr("href", link)
                       $("#tx_link").text(link)
 
