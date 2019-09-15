@@ -14,6 +14,10 @@ contract Voting {
 
   string[] public candidateList;
 
+  /* Boardcast event when a user voted
+  */
+  event VoteReceived(address user, string candidate);
+
   /* This is the constructor which will be called once and only once - when you
   deploy the contract to the blockchain. When we deploy the contract,
   we will pass an array of candidates who will be contesting in the election
@@ -31,8 +35,11 @@ contract Voting {
   // is equivalent to casting a vote
   function voteForCandidate(string memory candidate) public {
     votesReceived[candidate] += 1;
+
+    // Boardcast voted event
+    emit VoteReceived(msg.sender, candidate);
   }
-  
+
   function candidateCount() public view returns (uint256) {
       return candidateList.length;
   }
