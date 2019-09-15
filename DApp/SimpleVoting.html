@@ -6,11 +6,115 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="web3.js"></script>
         <script type="text/javascript">
-            var contractAddress = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015';
+            var contractAddress = '0xd991dD045b00866f0f6cAd33e9B1341272a792d7';
             var network = "";
             var userAccount = '';
             var warning = "";
-            let abi = [{"constant":false,"inputs":[{"name":"candidate","type":"string"}],"name":"voteForCandidate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"candidateNames","type":"string[]"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"candidateCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"candidateList","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"candidate","type":"string"}],"name":"totalVotesFor","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
+            let abi = [
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "string",
+                  "name": "candidate",
+                  "type": "string"
+                }
+              ],
+              "name": "voteForCandidate",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "string[]",
+                  "name": "candidateNames",
+                  "type": "string[]"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "string",
+                  "name": "candidate",
+                  "type": "string"
+                }
+              ],
+              "name": "VoteReceived",
+              "type": "event"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "candidateCount",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "candidateList",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "string",
+                  "name": "candidate",
+                  "type": "string"
+                }
+              ],
+              "name": "totalVotesFor",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
         </script>
         <script type="text/javascript">
           window.addEventListener('load', function() {
@@ -70,7 +174,6 @@
                       break
                     case 4:
                         network = 'Rinkeby';
-                        contractAddress = '0x6075b70b4f94af25e047fac6a538ea06a5206bca';
                       break
                     case 7:
                         network = 'Thai Chain';
@@ -111,6 +214,17 @@
                 
                 // Candidate contract
                 displayCandidates();
+
+                //Subscribe to Vote Received Event
+                let contract = getVotingContract();
+                contract.events.VoteReceived()
+                .on('data', function(event){
+                    $("<div>" + JSON.stringify(event) + "</div>").appendTo("#events");
+                })
+                .on('changed', function(event){
+                    // remove event from local database
+                })
+                .on('error', console.error);
             }
             
             // Get block info
@@ -463,6 +577,10 @@
                 -
               </span>
             </p>
+        </div>
+
+        <div id='events'>
+          Events: 
         </div>
 
         <footer class="footer">
