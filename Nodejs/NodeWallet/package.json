@@ -1,0 +1,19 @@
+{
+  "name": "nodewallet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Nattapon Nimakul <tot@kulap.io> (kulap.io)",
+  "license": "Private",
+  "dependencies": {
+    "ethereumjs-tx": "^2.1.1",
+    "ethereumjs-util": "^6.1.0",
+    "safe-buffer": "^5.2.0",
+    "web3": "^1.2.1"
+  }
+}
