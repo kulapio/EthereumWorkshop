@@ -6,7 +6,7 @@ const Buffer = require('safe-buffer').Buffer
 
 const infuraKey = ''
 if ('' === infuraKey) {
-  console.error('Please go to https://infura.io to get infuraKey (PROJECT SECRET)')
+  console.error('Please go to https://infura.io to get infuraKey (PROJECT ID)')
   return -1
 }
 const web3 = new Web3(`https://rinkeby.infura.io/v3/${infuraKey}`);
