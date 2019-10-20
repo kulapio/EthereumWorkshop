@@ -11,110 +11,138 @@
             var userAccount = '';
             var warning = "";
             let abi = [
-            {
-              "constant": false,
-              "inputs": [
-                {
-                  "internalType": "string",
-                  "name": "candidate",
-                  "type": "string"
-                }
-              ],
-              "name": "voteForCandidate",
-              "outputs": [],
-              "payable": false,
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "string[]",
-                  "name": "candidateNames",
-                  "type": "string[]"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "user",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "string",
-                  "name": "candidate",
-                  "type": "string"
-                }
-              ],
-              "name": "VoteReceived",
-              "type": "event"
-            },
-            {
-              "constant": true,
-              "inputs": [],
-              "name": "candidateCount",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "name": "candidateList",
-              "outputs": [
-                {
-                  "internalType": "string",
-                  "name": "",
-                  "type": "string"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [
-                {
-                  "internalType": "string",
-                  "name": "candidate",
-                  "type": "string"
-                }
-              ],
-              "name": "totalVotesFor",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            }
-          ]
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "candidate",
+				"type": "string"
+			}
+		],
+		"name": "totalVotesFor",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidateList",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "addWhiteList",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "candidate",
+				"type": "string"
+			}
+		],
+		"name": "voteForCandidate",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string[]",
+				"name": "candidateNames",
+				"type": "string[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "candidate",
+				"type": "string"
+			}
+		],
+		"name": "VoteReceived",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "AddWhiteList",
+		"type": "event"
+	}
+]
         </script>
         <script type="text/javascript">
           window.addEventListener('load', function() {
@@ -181,6 +209,7 @@
                       break
                     case 42:
                         network = 'Kovan';
+                        contractAddress = '0xea582ba29f58df24d86c1430e655f5a0416d02b9';
                       break
                     default:
                         network = 'Unknown';
@@ -218,8 +247,20 @@
                 //Subscribe to Vote Received Event
                 let contract = getVotingContract();
                 contract.events.VoteReceived()
-                .on('data', function(event){
-                    $("<div>" + JSON.stringify(event) + "</div>").appendTo("#events");
+                .on('data', function(event) {
+                    $("<div>Received Event: " + JSON.stringify(event) + "</div>").appendTo("#events");
+                })
+                .on('changed', function(event){
+                    // remove event from local database
+                })
+                .on('error', console.error);
+
+
+                //Subscribe to Vote Received Event
+                // let contract = getVotingContract();
+                contract.events.AddWhiteList()
+                .on('data', function(event) {
+                    $("<div>White List: " + JSON.stringify(event) + "</div>").appendTo("#events");
                 })
                 .on('changed', function(event){
                     // remove event from local database
