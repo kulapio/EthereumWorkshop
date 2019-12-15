@@ -1,11 +1,11 @@
 pragma solidity ^0.5.0;
 
-/// @title SimpleBank
+/// @title Bank
 /// @author nemild, kor, tot
 
 /* 'contract' has similarities to 'class' in other languages (class variables,
 inheritance, etc.) */
-contract SimpleBank { // CamelCase
+contract Bank { // CamelCase
     // Declare state variables outside function, persist through life of contract
 
     // dictionary that maps addresses to balances
@@ -58,7 +58,7 @@ contract SimpleBank { // CamelCase
     /// @param withdrawAmount amount you want to withdraw
     /// @return The balance remaining for the user
     function withdraw(uint withdrawAmount) public returns (uint256 remainingBal) {
-        require(balances[msg.sender] >= withdrawAmount, "Balance is not enought");
+        require(balances[msg.sender] >= withdrawAmount, "Balance is not enough");
         balances[msg.sender] = balances[msg.sender] - withdrawAmount;
 
         // Revert on failed
@@ -113,7 +113,7 @@ contract SimpleBank { // CamelCase
             balances[account] = balances[account] + interest;
             totalInterest = totalInterest + interest;
         }
-        require(msg.value == totalInterest, "Not enought interest to pay!!");
+        require(msg.value == totalInterest, "Not enough interest to pay!!");
     }
     
     /// @notice Bank system balance
@@ -138,7 +138,7 @@ contract SimpleBank { // CamelCase
     /// @return The balance remaining for the system
     function systemWithdraw(uint withdrawAmount) public returns (uint256 remainingBal) {
         require(owner == msg.sender, "You are not authorized");
-        require(systemBalance() >= withdrawAmount, "System balance is not enought");
+        require(systemBalance() >= withdrawAmount, "System balance is not enough");
 
         // Revert on failed
         msg.sender.transfer(withdrawAmount);
