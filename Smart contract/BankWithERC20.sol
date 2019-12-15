@@ -159,8 +159,8 @@ contract SimpleBank { // CamelCase
      */
     event Transfer(address indexed from, address indexed to, uint256 value);
     
-    string public name = "BANK";
-    string public symbol = "BANK";
+    string public name = "USD";
+    string public symbol = "USD";
     uint public decimals = 18;
     
     function totalSupply() external view returns (uint256) {
