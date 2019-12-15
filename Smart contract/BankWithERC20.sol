@@ -48,7 +48,7 @@ contract Bank { // CamelCase
         // no "this." or "self." required with state variable
         // all values set to data type's initial value by default
 
-        // Boardcast deposit event
+        // Broadcast deposit event
         emit DepositMade(msg.sender, msg.value); // fire event
 
         return balances[msg.sender];
@@ -65,7 +65,7 @@ contract Bank { // CamelCase
         // Revert on failed
         msg.sender.transfer(withdrawAmount);
         
-        // Boardcast withdraw event
+        // Broadcast withdraw event
         emit WithdrawMade(msg.sender, withdrawAmount);
         
         return balances[msg.sender];
@@ -128,7 +128,7 @@ contract Bank { // CamelCase
     function systemDeposit() public payable returns (uint256) {
         require(owner == msg.sender, "You are not authorized");
 
-        // Boardcast deposit event
+        // Broadcast deposit event
         emit SystemDepositMade(msg.sender, msg.value); // fire event
 
         return systemBalance();
@@ -144,7 +144,7 @@ contract Bank { // CamelCase
         // Revert on failed
         msg.sender.transfer(withdrawAmount);
         
-        // Boardcast system withdraw event
+        // Broadcast system withdraw event
         emit SystemWithdrawMade(msg.sender, withdrawAmount);
         
         return systemBalance();
@@ -182,7 +182,7 @@ contract Bank { // CamelCase
         balances[msg.sender] = balances[msg.sender] - amount;
         balances[recipient] = balances[recipient] + amount;
         
-        // Boardcast withdraw event
+        // Broadcast withdraw event
         emit Transfer(msg.sender, recipient, amount);
         
         return true;
