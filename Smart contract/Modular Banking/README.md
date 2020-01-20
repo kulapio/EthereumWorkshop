@@ -1,3 +1,6 @@
+![Modular Banking Diagram](https://github.com/kulapio/EthereumWorkshop/blob/master/Smart%20contract/Modular%20Banking/Modular%20Banking%20Diagram.png?raw=true)
+
+
 # Architect
 This Modular Banking will seperate into 3 parts.
 
