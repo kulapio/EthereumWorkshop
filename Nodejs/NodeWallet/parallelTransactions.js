@@ -11,11 +11,14 @@ if ('' === infuraKey) {
 }
 const web3 = new Web3(`https://rinkeby.infura.io/v3/${infuraKey}`);
 
-async function transferEther(account, toAddress, amount) {
-  const txCount = await web3.eth.getTransactionCount(account.address)
+async function transferEther(account, toAddress, amount, nonce=null) {
+  if (null == nonce) {
+    nonce = await web3.eth.getTransactionCount(account.address)
+  }
+
   var rawTx = {
     from: '0x55509eC248c859e15293189548a8b79E2306e0CD',
-    nonce: util.bufferToHex(txCount),
+    nonce: util.bufferToHex(nonce),
     gasPrice: '0x003B9ACA00',
     // gasPrice: util.bufferToHex(9 * 10 ** 9),
     // gasLimit: util.bufferToHex(100000),
@@ -191,11 +194,13 @@ async function main() {
   const balance = await web3.eth.getBalance(account.address)
   console.log(`balance ${balance}`)
 
-  // transfer
-  // await transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12)
+  // Fetch tx count
+  const txCount = await web3.eth.getTransactionCount(account.address)
+  const tx1 = transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12, txCount)
+  const tx2 = transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12, txCount + 1)
+  const tx3 = transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12, txCount + 2)
 
-  // Vote
-  voteCandidate(account, 'dog')
+  await Promise.all([tx1, tx2, tx3])
 
   return true
 }
