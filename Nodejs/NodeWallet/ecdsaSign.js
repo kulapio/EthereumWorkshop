@@ -2,7 +2,8 @@ const Web3 = require('web3')
 const Tx = require('ethereumjs-tx').Transaction
 const util = require('ethereumjs-util');   
 const Buffer = require('safe-buffer').Buffer
-
+// var EC = require('elliptic').ec;
+const secp256k1 = require('secp256k1')
 
 const infuraKey = ''
 if ('' === infuraKey) {
@@ -11,13 +12,16 @@ if ('' === infuraKey) {
 }
 const ChainInfo = {
   mainnet: {
-    name: 'mainnet'
+    name: 'mainnet',
+    chainIdForSig: 1
   },
   rinkeby: {
-    name: 'rinkeby'
+    name: 'rinkeby',
+    chainIdForSig: 0
   },
   kovan: {
-    name: 'kovan'
+    name: 'kovan',
+    chainIdForSig: 42
   }
 }
 const ChainConfig = ChainInfo.rinkeby
@@ -37,11 +41,25 @@ async function transferEther(account, toAddress, amount) {
   console.log('rawTx', rawTx)
 
   let tx = new Tx(rawTx, { chain: ChainConfig.name })
+  // console.log('tx.getChainId()', tx.getChainId())
+  // let tx = new Tx(rawTx)
   console.log('transaction: ', tx.serialize().toString('hex'))
   console.log('tx.hash(false): ', tx.hash(false).toString('hex'))
-  tx.sign(new Buffer.from(account.privateKey, 'hex'))
-  console.log('tx.v', tx.v)
 
+  // var ec = new EC('secp256k1');
+  // var key = ec.keyFromPrivate(account.privateKey);
+  // var signature = key.sign(tx.hash(false).toString('hex'))
+
+  // tx.r = Buffer.from(signature.r.toString('hex'), 'hex')
+  // tx.s = Buffer.from(signature.s.toString('hex'), 'hex')
+  // const v = chainId ? signature.recoveryParam + (chainId * 2 + 35) : signature.recoveryParam + 27
+
+  var sig = secp256k1.ecdsaSign(tx.hash(false), Buffer.from(account.privateKey, 'hex'))
+  tx.r = Buffer.from(sig.signature.slice(0, 32), 'hex')
+  tx.s = Buffer.from(sig.signature.slice(32, 64), 'hex')
+  const v = ChainConfig.chainIdForSig ? sig.recid + (ChainConfig.chainIdForSig * 2 + 35) : sig.recid + 27
+  tx.v = Buffer.from(v.toString(16), 'hex')
+  console.log('tx.v', tx.v)
   let serializedTx = tx.serialize()
   console.log('transaction signed: ', serializedTx.toString('hex'))
 
