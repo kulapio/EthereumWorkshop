@@ -5,7 +5,7 @@ import validateConnection from './validateConnection'
 class SmartContract {
   constructor (
     // ethNode = 'wss://rinkeby.infura.io/_ws',
-    contractAddr = '0x08C0EbDa8D78c64715A0772f9697942E2Bc0B471') {
+    contractAddr = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015') {
 
     // Modern dapp browsers...
     if (window.ethereum) {
@@ -27,8 +27,7 @@ class SmartContract {
     } else {
       console.log('No web3? You should consider trying MetaMask!')
       // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-      // web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
-      this.web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/xxxxxxx"));
+      this.web3 = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/"));
     }
 
     console.log('web3: ', this.web3);
@@ -38,10 +37,20 @@ class SmartContract {
       this.account = account
     })
 
-    this.contract = new this.web3.eth.Contract(ContractAbi, this.contractAddr)
+    this.getNetID().then(netId => {
+      if ('Rinkeby' == netId.name) {
+        this.contractAddr = '0x6075b70b4f94af25e047fac6a538ea06a5206bca'
 
-    console.log('Methods: ', this.contract.methods)
+      } else if ('Kovan' == netId.name) {
+        this.contractAddr = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015'
 
+      } else if ('Thai Chain' == netId.name) {
+        this.contractAddr = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6'
+
+      }
+      this.contract = new this.web3.eth.Contract(ContractAbi, this.contractAddr)
+      console.log('Methods: ', this.contract.methods)
+    })
   }
 
   async getNetID() {
