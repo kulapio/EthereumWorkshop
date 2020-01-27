@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Web3 from 'web3'
 import ContractAbi from '../abi/voting.json'
 import validateConnection from './validateConnection'
