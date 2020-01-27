@@ -1,7 +1,12 @@
 const Web3 = require('web3')
 const express = require('express')
 
-let web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/v3/4e81201d04f84222a663fa0efe57270e" ));
+const infuraKey = '4e81201d04f84222a663fa0efe57270e'
+if ('' === infuraKey) {
+  console.error('Please go to https://infura.io to get infuraKey (PROJECT ID)')
+  return -1
+}
+let web3 = new Web3( new Web3.providers.HttpProvider( `https://kovan.infura.io/v3/${infuraKey}` ));
 
 async function getSystemBankBalance() {
   var contractAddress = '0x50a397b04001d663c2bb124e9507b16d8d3e0e1f';
