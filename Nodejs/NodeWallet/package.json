@@ -11,7 +11,9 @@
   "author": "Nattapon Nimakul <tot@kulap.io> (kulap.io)",
   "license": "Private",
   "dependencies": {
+    "abi-decoder": "^2.2.2",
     "elliptic": "^6.5.2",
+    "ethereum-tx-decoder": "^3.0.0",
     "ethereumjs-tx": "^2.1.1",
     "ethereumjs-util": "^6.1.0",
     "safe-buffer": "^5.2.0",
