@@ -50,7 +50,7 @@
     <b-taglist attached>
       <b-tag type="is-medium is-dark"> Network: {{ web3.networkId }} </b-tag>
       <b-tag type="is-medium is-info"> Account: {{ web3.coinbase }} </b-tag>
-      <b-tag type="is-medium is-success"> balance: {{ web3.balance }} </b-tag>
+      <b-tag type="is-medium is-success"> Balance: {{ web3.balance }} ETH </b-tag>
     </b-taglist>
 
 
@@ -68,27 +68,95 @@ const smartContract = new SmartContract()
 export default {
   name: 'NavBar',
   props: {
-    wallet: []
   },
   data: () => ({
-    accountExist: false,
-    account: web3.coinbase
+    account: null,
+    block: null,
+    balance: null
   }),
   computed: {
     ...mapState({
       web3: state => state.web3
     })
   },
-  created() {
+  async created () {
+    // Load from local storage
+    this.userData = new UserDataPersistance()
+
+    this.network = await smartContract.getNetID()
+    this.updateNetworkId(this.network.name)
+    this.block = await smartContract.getBlock()
+
+    try {
+      this.account = await smartContract.loadUserAddress()
+    } catch {
+      this.account = ''
+    }
+
+    try {
+      this.balance = await smartContract.getBalance(this.account)
+    } catch {
+      this.balance = '0'
+    }
+
+    console.log('Start: ', this.userData, this.account, this.balance, this.web3)
+
+    if (this.account) {
+      this.updateWeb3({
+        'coinbase': this.account,
+        'balance': this.balance,
+        'networkId': this.network.name
+      })
+
+      let _this = this
+      window.ethereum.on('accountsChanged', async function (accounts) {
+        console.log("change", accounts[0])
+        this.network = await smartContract.getNetID()
+        try {
+          this.balance = await smartContract.getBalance(accounts[0])
+        } catch {
+          this.balance = '0'
+        }
+
+        _this.updateWeb3({
+          'coinbase': accounts[0],
+          'balance': this.balance,
+          'networkId': this.network.name
+        })
+      })
+
+    } else {
+      if (this.userData.userAddress) {
+        let balance = await smartContract.getBalance(this.userData.userAddress)
+        this.updateBalance({
+          'address': this.userData.userAddress,
+          'balance': balance
+        })
+        await this.updatePersistance(this.userData.userAddress, balance)
+      } else {
+        let account = await smartContract.createAccount()
+        console.log ('Wallet: ', account)
+        this.createWallet({
+          'address': account.address,
+          'balance': 0,
+          'mnemonic': account.privateKey
+        })
+        await this.updatePersistance(account.address, 0, account.privateKey)
+      }
+    }
+
   },
   methods: {
     ...mapActions({
-      updateWeb3: 'updateWeb3'
+      updateWeb3: 'updateWeb3',
+      createWallet: 'createWallet',
+      updateNetworkId: 'updateNetworkId',
+      updateBalance: 'updateBalance'
     }),
-    async createAccount() {
-      this.account = await smartContract.createAccount()
-      console.log(this.account);
-    }
+    async updatePersistance (userAddress, balance, mnemonic) {
+      this.userData.update(userAddress, balance, mnemonic)
+      this.userData.save()
+    },
   }
 }
 </script>

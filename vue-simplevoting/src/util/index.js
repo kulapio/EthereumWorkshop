@@ -28,7 +28,7 @@ class SmartContract {
       console.log('No web3? You should consider trying MetaMask!')
       // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
       // web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
-      this.web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/xxxxxxx"));
+      this.web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/1bfd0db83ef340ef8c81945c5e96a911"));
     }
 
     console.log('web3: ', this.web3);
