@@ -5,7 +5,7 @@ import validateConnection from './validateConnection'
 class SmartContract {
   constructor (
     // ethNode = 'wss://rinkeby.infura.io/_ws',
-    contractAddr = '0x08C0EbDa8D78c64715A0772f9697942E2Bc0B471') {
+    contractAddr = 'xxxx') {
 
     // Modern dapp browsers...
     if (window.ethereum) {
@@ -28,7 +28,7 @@ class SmartContract {
       console.log('No web3? You should consider trying MetaMask!')
       // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
       // web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
-      this.web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/1bfd0db83ef340ef8c81945c5e96a911"));
+      this.web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/xxxx"));
     }
 
     console.log('web3: ', this.web3);
