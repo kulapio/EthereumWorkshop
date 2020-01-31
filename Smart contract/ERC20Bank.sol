@@ -50,7 +50,7 @@ contract Erc20Bank is Ownable {
     }
     
     function withdraw (uint amount) public returns (uint256 remainingBalance) {
-        require(balances[msg.sender] >= amount, "Balance is not enought");
+        require(balances[msg.sender] >= amount, "Balance is not enough");
 
         balances[msg.sender] = balances[msg.sender].sub(amount);
         

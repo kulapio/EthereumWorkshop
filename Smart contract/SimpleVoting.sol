@@ -14,7 +14,7 @@ contract Voting {
 
   string[] public candidateList;
 
-  /* Boardcast event when a user voted
+  /* Broadcast event when a user voted
   */
   event VoteReceived(address user, string candidate);
 
@@ -36,7 +36,7 @@ contract Voting {
   function voteForCandidate(string memory candidate) public {
     votesReceived[candidate] += 1;
 
-    // Boardcast voted event
+    // Broadcast voted event
     emit VoteReceived(msg.sender, candidate);
   }
 
