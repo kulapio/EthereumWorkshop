@@ -1,5 +1,8 @@
 # vue-simplevoting
-Replace xxxxxxx with your infura key and then run installation
+util/index.js
+- Replace xxxxxxx with your infura key
+- Replace contractAddr with your deployed contract
+- Install, Run, Enjoy.
 
 ## Project setup
 ```
