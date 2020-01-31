@@ -43,6 +43,7 @@ export default {
     NavBar
   },
   async created () {
+    await smartContract.init()
     // console.log('Registering Web3 ..')
     // this.$store.dispatch('registerWeb3')
 

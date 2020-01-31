@@ -37,21 +37,23 @@ class SmartContract {
     this.loadUserAddress().then(account => {
       this.account = account
     })
+  }
 
-    this.getNetID().then(netId => {
-      if ('Rinkeby' == netId.name) {
-        this.contractAddr = '0x6075b70b4f94af25e047fac6a538ea06a5206bca'
 
-      } else if ('Kovan' == netId.name) {
-        this.contractAddr = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015'
+  async init() {
+    const netId = await this.getNetID()
+    if ('Rinkeby' == netId.name) {
+      this.contractAddr = '0x6075b70b4f94af25e047fac6a538ea06a5206bca'
 
-      } else if ('Thai Chain' == netId.name) {
-        this.contractAddr = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6'
+    } else if ('Kovan' == netId.name) {
+      this.contractAddr = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015'
 
-      }
-      this.contract = new this.web3.eth.Contract(ContractAbi, this.contractAddr)
-      console.log('Methods: ', this.contract.methods)
-    })
+    } else if ('Thai Chain' == netId.name) {
+      this.contractAddr = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6'
+
+    }
+    this.contract = new this.web3.eth.Contract(ContractAbi, this.contractAddr)
+    console.log('Methods: ', this.contract.methods)
   }
 
   async getNetID() {
