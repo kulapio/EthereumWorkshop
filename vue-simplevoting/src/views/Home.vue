@@ -42,29 +42,14 @@ export default {
   components: {
     NavBar
   },
-  async created() {
+  async created () {
     // console.log('Registering Web3 ..')
     // this.$store.dispatch('registerWeb3')
 
     this.userData = new UserDataPersistance()
+    console.log('UserData: ', this.userData)
 
     console.log("Initial Web3 Services ", smartContract)
-
-    this.network = await smartContract.getNetID()
-    this.block = await smartContract.getBlock()
-    console.log('Block >> ' + JSON.stringify(this.block))
-
-    try {
-      this.account = await smartContract.loadUserAddress()
-    } catch {
-      this.account = ''
-    }
-
-    try {
-      this.balance = await smartContract.getBalance(this.account)
-    } catch {
-      this.balance = '0'
-    }
 
     try {
       this.candidateCount = await smartContract.getCandidateCount()
@@ -77,43 +62,22 @@ export default {
         console.log(`Candidate Name: ${name} Votes: ${vote}`);
         this.candidates.push({"name": name, "vote": vote, "img": "https://loremflickr.com/320/240"})
       }
-    } catch {
-      this.balance = '0'
+    } catch (error) {
+      console.log('Error get candidate: ', error)
     }
-
-    this.updateWeb3({
-      'coinbase': this.account,
-      'balance': this.balance,
-      'networkId': this.network.name
-    })
-
-    let _this = this
-    window.ethereum.on('accountsChanged', async function (accounts) {
-      console.log("change", accounts[0])
-      this.network = await smartContract.getNetID()
-      try {
-        this.balance = await smartContract.getBalance(accounts[0])
-      } catch {
-        this.balance = '0'
-      }
-
-      _this.updateWeb3({
-        'coinbase': accounts[0],
-        'balance': this.balance,
-        'networkId': this.network.name
-      })
-    })
   },
   computed: {
     ...mapState({
-      web3: state => state.web3
+      web3: state => state.web3,
+      wallet: state => state.wallet
     })
   },
   watch: {
   },
   methods: {
     ...mapActions({
-      updateWeb3: 'updateWeb3'
+      updateWeb3: 'updateWeb3',
+      updateWallet: 'updateWallet'
     }),
     voteAt (name, network, userAccount) {
       smartContract.voteAt(name, network, userAccount).then(result => {
