@@ -167,10 +167,8 @@ async function voteCandidate(account, name) {
   var rawTx = {
     from: '0x55509eC248c859e15293189548a8b79E2306e0CD',
     nonce: '0x' + txCount.toString(16),
-    gasPrice: '0x003B9ACA00',
-    // gasPrice: util.bufferToHex(9 * 10 ** 9),
-    // gasLimit: util.bufferToHex(100000),
-    gasLimit: '0x250CA',
+    gasLimit: util.bufferToHex(175000),
+    gasPrice: util.bufferToHex(2 * 10 ** 9), // 2 gwei
     to: contractAddress,
     value: '0x0',
     data: contract.methods.voteForCandidate(name).encodeABI()
@@ -183,6 +181,7 @@ async function voteCandidate(account, name) {
 
   const result = await web3.eth.sendSignedTransaction('0x' + 
     serializedTx.toString('hex'))
+
   console.log(`result`, result)
   // .on('receipt', console.log);
   return true
@@ -206,10 +205,10 @@ async function main() {
   console.log(`balance ${balance}`)
 
   // transfer
-  await transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12)
+  // await transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12)
 
   // Vote
-  // voteCandidate(account, 'dog')
+  await voteCandidate(account, 'dog')
 
   return true
 }
