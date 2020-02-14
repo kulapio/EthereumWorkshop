@@ -11,10 +11,12 @@ async function main() {
   const privateKey = Buffer.from(account.privateKey, 'hex')
   const publicKey = Buffer.from(secp256k1.publicKeyCreate(privateKey, false).slice(1), 'hex').toString('hex')
   const address = util.publicToAddress('0x' + publicKey).toString('hex')
+  const address2 = util.keccak256(Buffer.from(publicKey, 'hex')).slice(-20).toString('hex')
 
   console.log('privateKey:', privateKey)
   console.log('publicKey:', publicKey)
   console.log('address:', address)
+  console.log('address2:', address2)
 
   return true
 }
