@@ -46,8 +46,11 @@ set +x
 echo "Go to http://localhost:8080/SimpleVoting.html"
 ```
 
-### Live demo here
+### Live demo ( with jQuery )
 - [https://dev.kulap.io/workshop/smartcontract/simplevote/SimpleVoting.html](https://dev.kulap.io/workshop/smartcontract/simplevote/SimpleVoting.html)
+
+### Live demo ( with Vuejs )
+- [https://dev.kulap.io/workshop/vuejs/simplevote/](https://dev.kulap.io/workshop/vuejs/simplevote/)
 
 ## Deploy your own ERC-20 token
 - Copy content of file Smart contarct/ERC20Token.sol

@@ -9,45 +9,34 @@ if ('' === infuraKey) {
   console.error('Please go to https://infura.io to get infuraKey (PROJECT ID)')
   return -1
 }
-const ChainInfo = {
-  mainnet: {
-    name: 'mainnet'
-  },
-  rinkeby: {
-    name: 'rinkeby'
-  },
-  kovan: {
-    name: 'kovan'
-  }
-}
-const ChainConfig = ChainInfo.rinkeby
-const web3 = new Web3(`https://${ChainConfig.name}.infura.io/v3/${infuraKey}`);
+const web3 = new Web3(`https://rinkeby.infura.io/v3/${infuraKey}`);
 
-async function transferEther(account, toAddress, amount) {
-  const txCount = await web3.eth.getTransactionCount(account.address)
+async function transferEther(account, toAddress, amount, nonce=null) {
+  if (null == nonce) {
+    nonce = await web3.eth.getTransactionCount(account.address)
+  }
+
   var rawTx = {
-    from: account.address,
-    nonce: util.bufferToHex(txCount),
-    gasPrice: util.bufferToHex(2 * 10 ** 9),
-    gasLimit: util.bufferToHex(151754),
+    from: '0x55509eC248c859e15293189548a8b79E2306e0CD',
+    nonce: util.bufferToHex(nonce),
+    gasPrice: '0x003B9ACA00',
+    // gasPrice: util.bufferToHex(9 * 10 ** 9),
+    // gasLimit: util.bufferToHex(100000),
+    gasLimit: '0x250CA',
     to: toAddress,
     value: util.bufferToHex(amount),
-    data: '0x'
+    data: '0x0'
   }
-  console.log('rawTx', rawTx)
 
-  let tx = new Tx(rawTx, { chain: ChainConfig.name })
-  console.log('transaction: ', tx.serialize().toString('hex'))
-  console.log('tx.hash(false): ', tx.hash(false).toString('hex'))
+  let tx = new Tx(rawTx, { chain: 'rinkeby' })
   tx.sign(new Buffer.from(account.privateKey, 'hex'))
-  console.log('tx.v', tx.v)
 
   let serializedTx = tx.serialize()
-  console.log('transaction signed: ', serializedTx.toString('hex'))
 
   const result = await web3.eth.sendSignedTransaction('0x' + 
     serializedTx.toString('hex'))
   console.log(`result`, result)
+  // .on('receipt', console.log);
   return true
 }
 
@@ -205,11 +194,13 @@ async function main() {
   const balance = await web3.eth.getBalance(account.address)
   console.log(`balance ${balance}`)
 
-  // transfer
-  await transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12)
+  // Fetch tx count
+  const txCount = await web3.eth.getTransactionCount(account.address)
+  const tx1 = transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12, txCount)
+  const tx2 = transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12, txCount + 1)
+  const tx3 = transferEther(account, '0x786F95663B1fEAa429FE608dd51946356f9e6D54', 12, txCount + 2)
 
-  // Vote
-  // voteCandidate(account, 'dog')
+  await Promise.all([tx1, tx2, tx3])
 
   return true
 }
