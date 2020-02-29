@@ -127,13 +127,15 @@ export default {
 
     } else {
       if (this.userData.userAddress) {
+        console.log("Update UserAddress");
         let balance = await smartContract.getBalance(this.userData.userAddress)
         this.updateBalance({
           'address': this.userData.userAddress,
           'balance': balance
         })
-        await this.updatePersistance(this.userData.userAddress, balance)
+        await this.updateUserBalance(balance)
       } else {
+        console.log("Create UserAddress");
         let account = await smartContract.createAccount()
         console.log ('Wallet: ', account)
         this.createWallet({
@@ -155,6 +157,10 @@ export default {
     }),
     async updatePersistance (userAddress, balance, mnemonic) {
       this.userData.update(userAddress, balance, mnemonic)
+      this.userData.save()
+    },
+    async updateUserBalance (balance) {
+      this.userData.updateUserBalance(balance)
       this.userData.save()
     },
   }

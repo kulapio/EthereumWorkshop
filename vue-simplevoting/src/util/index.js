@@ -1,11 +1,14 @@
 import Web3 from 'web3'
 import ContractAbi from '../abi/voting.json'
 import validateConnection from './validateConnection'
+import Tx from 'ethereumjs-tx'
 
 class SmartContract {
   constructor (
     // ethNode = 'wss://rinkeby.infura.io/_ws',
-    contractAddr = 'xxxx') {
+    // contractAddr = '0x08C0EbDa8D78c64715A0772f9697942E2Bc0B471')
+    contractAddr = '0xE798Ebe99be40E08204B2756dFC4b78604bb0416')
+    {
 
     // Modern dapp browsers...
     if (window.ethereum) {
@@ -28,7 +31,7 @@ class SmartContract {
       console.log('No web3? You should consider trying MetaMask!')
       // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
       // web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
-      this.web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/xxxx"));
+      this.web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/1bfd0db83ef340ef8c81945c5e96a911"));
     }
 
     console.log('web3: ', this.web3);
@@ -130,16 +133,15 @@ class SmartContract {
     return await this.contract.methods.totalVotesFor(name).call()
   }
 
-  async voteAt(name, network, userAccount) {
-
-    console.log(name, network, userAccount);
+  async voteAt(name, network, userAccount, key) {
+    console.log("VoteAt: ", this.contract, name, network, userAccount, key)
     // let name = await this.contract.methods.candidateList(index).call()
     let options = {
       from: userAccount
     }
-
-    // Send a transaction to blockchain
-    return await this.contract.methods.voteForCandidate(name).send(options)
+    if (typeof web3 !== 'undefined') {
+      // Send a transaction to blockchain
+      return await this.contract.methods.voteForCandidate(name).send(options)
       .on('error', (error) => {
         console.error(error)
         return {
@@ -176,8 +178,41 @@ class SmartContract {
             "receipt": receipt
           }
       })
-    }
+    } else if (this.contract.currentProvider.host.match(/infura/g)) {
 
+      const sendRawTx = rawTx =>
+      new Promise((resolve, reject) =>
+        this.web3.eth
+          .sendSignedTransaction(rawTx)
+          .on('transactionHash', resolve)
+          .on('error', reject)
+      );
+
+      (async () => {
+        const { address: from } = this.web3.eth.accounts.privateKeyToAccount(key)
+
+        let query = await this.contract.methods.voteForCandidate(name)
+        console.log(query, from);
+        let nonce = await this.web3.eth.getTransactionCount(from)
+
+        const transaction = {
+          to: this.contractAddr,
+          from,
+          value: '0',
+          data: query.encodeABI(),
+          gasPrice: this.web3.utils.toWei('20', 'gwei'),
+          gas: 300000, // 1.5 coefficient, just make sure that gas amount is enough
+          nonce: '0x' + nonce.toString(16)
+        }
+        console.log("Trx Param", transaction);
+        const signed = await this.web3.eth.accounts.signTransaction(transaction, key)
+
+        const hash = await sendRawTx(signed.rawTransaction)
+        console.log("Hash", hash)
+      })()
+
+    }
+  }
 
 }
 

@@ -11,7 +11,7 @@
               <div class="card_content" >
                 <h2 class="card_title"> Vote For: {{ candidate.name }} </h2>
                 <p class="card_text"> Total Vote: {{ candidate.vote }} </p>
-                <button class="btn card_btn" @click="voteAt(candidate.name, web3.networkId, web3.coinbase)"> Vote Now ! </button>
+                <button class="btn card_btn" @click="voteAt(candidate.name, web3.networkId, web3.coinbase, userData.mnemonic)"> Vote Now ! </button>
               </div>
             </div>
           </li>
@@ -79,12 +79,11 @@ export default {
       updateWeb3: 'updateWeb3',
       updateWallet: 'updateWallet'
     }),
-    voteAt (name, network, userAccount) {
-      smartContract.voteAt(name, network, userAccount).then(result => {
-        console.log('Vote Result: ', result);
-        this.$forceUpdate();
+    voteAt (name, network, userAccount, key) {
+      smartContract.voteAt(name, network, userAccount, key).then(result => {
+        console.log('Vote Result: ', result)
+        this.$forceUpdate()
       })
-
     }
   }
 }
