@@ -4,7 +4,7 @@ const util = require('ethereumjs-util');
 const Buffer = require('safe-buffer').Buffer
 
 
-const infuraKey = '2b2ecc02f32c4f6fbf4f220caacc532c'
+const infuraKey = ''
 if ('' === infuraKey) {
   console.error('Please go to https://infura.io to get infuraKey (PROJECT ID)')
   return -1

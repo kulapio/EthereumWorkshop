@@ -1,7 +1,7 @@
 const Web3 = require('web3')
 const express = require('express')
 
-const infuraKey = '4e81201d04f84222a663fa0efe57270e'
+const infuraKey = ''
 if ('' === infuraKey) {
   console.error('Please go to https://infura.io to get infuraKey (PROJECT ID)')
   return -1
