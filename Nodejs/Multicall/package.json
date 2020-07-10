@@ -1,0 +1,15 @@
+{
+  "name": "test-multicall",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Nattapon Nimakul <tot@kulap.io> (kulap.io)",
+  "license": "Private",
+  "dependencies": {
+    "ethers": "^5.0.5"
+  }
+}
