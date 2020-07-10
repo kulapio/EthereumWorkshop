@@ -28,7 +28,7 @@ const main = async () => {
   const name = usdt.interface.decodeFunctionResult('name', res[0])
   const decimals = usdt.interface.decodeFunctionResult('decimals', res[1]).toString(10)
   const balance = usdt.interface.decodeFunctionResult('balanceOf', res[2]).toString(10)
-  console.table({block, name, decimals, balance})
+  console.table({block, name, decimals, balance: ethers.utils.formatUnits(balance, decimals)})
 }
 
 (async () => {
