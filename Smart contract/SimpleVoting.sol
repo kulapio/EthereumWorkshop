@@ -1,4 +1,6 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 // specifies what version of compiler this code will be compiled with
 

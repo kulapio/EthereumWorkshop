@@ -1,4 +1,6 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
 
 /// @title Bank
 /// @author nemild, kor, tot
@@ -56,7 +58,7 @@ contract Bank { // CamelCase
     /// @notice Withdraw ether from bank
     /// @dev This does not return any excess ether sent to it
     /// @param withdrawAmount amount you want to withdraw
-    /// @return The balance remaining for the user
+    /// @return remainingBal The balance remaining for the user
     function withdraw(uint withdrawAmount) public returns (uint256 remainingBal) {
         require(balances[msg.sender] >= withdrawAmount, "Balance is not enough");
         balances[msg.sender] = balances[msg.sender] - withdrawAmount;
@@ -135,7 +137,7 @@ contract Bank { // CamelCase
     
     /// @notice Withdraw ether from the system
     /// @param withdrawAmount amount you want to withdraw
-    /// @return The balance remaining for the system
+    /// @return remainingBal The balance remaining for the system
     function systemWithdraw(uint withdrawAmount) public returns (uint256 remainingBal) {
         require(owner == msg.sender, "You are not authorized");
         require(systemBalance() >= withdrawAmount, "System balance is not enough");
@@ -149,4 +151,3 @@ contract Bank { // CamelCase
         return systemBalance();
     }
 }
-

@@ -1,4 +1,6 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
 
 
 /**
@@ -163,7 +165,7 @@ contract SimpleBank { // CamelCase
     /// @notice Withdraw ether from bank
     /// @dev This does not return any excess ether sent to it
     /// @param withdrawAmount amount you want to withdraw
-    /// @return The balance remaining for the user
+    /// @return remainingBal The balance remaining for the user
     function withdraw(uint withdrawAmount) public returns (uint256 remainingBal) {
         require(balances[msg.sender] >= withdrawAmount);
         balances[msg.sender] = balances[msg.sender].sub(withdrawAmount);
@@ -187,7 +189,7 @@ contract SimpleBank { // CamelCase
     // Typically, called when invalid data is sent
     // Added so ether sent to this contract is reverted if the contract fails
     // otherwise, the sender's money is transferred to contract
-    function () external {
+    fallback () external {
         revert(); // throw reverts state to before call
     }
     
@@ -209,4 +211,3 @@ contract SimpleBank { // CamelCase
     }
 }
 // ** END EXAMPLE **
-
