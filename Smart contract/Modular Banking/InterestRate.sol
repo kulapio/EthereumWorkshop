@@ -1,12 +1,13 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
 
 /// @title InterestRate
 /// @author Nattapon Nimakul, kulap.io
 
-import "./SafeMath1.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
 // import "./InterestRateInterface.sol";
-import "./Ownerable.sol";
-
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/access/Ownable.sol";
 
 contract InterestRate is Ownable {
     using SafeMath for uint256;

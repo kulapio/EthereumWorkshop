@@ -1,9 +1,11 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
 
-import "./SafeMath1.sol";
+pragma solidity ^0.6.0;
+
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
 import "./InterestRateInterface.sol";
 import "./BankBalanceInterface.sol";
-import "./Ownerable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/access/Ownable.sol";
 
 /// @title ModularBank
 /// @author Nattapon Nimakul, kulap.io
@@ -52,7 +54,7 @@ contract ModularBank is Ownable { // CamelCase
     /// @notice Withdraw ether from bank
     /// @dev This does not return any excess ether sent to it
     /// @param withdrawAmount amount you want to withdraw
-    /// @return The balance remaining for the user
+    /// @return remainingBal The balance remaining for the user
     function withdraw(uint withdrawAmount) public returns (uint256 remainingBal) {
         uint256 newBalance = bankBalanceModule.withdraw(msg.sender, withdrawAmount);
 
@@ -74,7 +76,7 @@ contract ModularBank is Ownable { // CamelCase
     // Typically, called when invalid data is sent
     // Added so ether sent to this contract is reverted if the contract fails
     // otherwise, the sender's money is transferred to contract
-    function () external {
+    fallback () external {
         // revert(); // throw reverts state to before call
     }
     
@@ -91,4 +93,3 @@ contract ModularBank is Ownable { // CamelCase
     }
 }
 // ** END EXAMPLE **
-

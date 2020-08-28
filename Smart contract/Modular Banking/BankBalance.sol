@@ -1,11 +1,13 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
 
 /// @title BankBalances
 /// @author Nattapon Nimakul, kulap.io
 
-import "./SafeMath1.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
 // import "./InterestRateInterface.sol";
-import "./Ownerable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/access/Ownable.sol";
 
 
 /// @title SimpleBank
@@ -45,7 +47,7 @@ contract BankBalances is Ownable { // CamelCase
     /// @notice Withdraw ether from bank
     /// @dev This does not return any excess ether sent to it
     /// @param withdrawAmount amount you want to withdraw
-    /// @return The balance remaining for the user
+    /// @return remainingBal The balance remaining for the user
     function withdraw(address user, uint withdrawAmount) public returns (uint256 remainingBal) {
         // require(coreBank == msg.sender);
 
@@ -66,10 +68,10 @@ contract BankBalances is Ownable { // CamelCase
         return balances[user];
     }
     
-    function accounts(uint256 index) external returns (address) {
+    function accounts(uint256 index) external view returns (address) {
         return _accounts[index];
     }
-    function accountsCount() external returns (uint256) {
+    function accountsCount() external view returns (uint256) {
         return _accounts.length;
     }
     
@@ -77,7 +79,7 @@ contract BankBalances is Ownable { // CamelCase
         balances[user] = newBalance;
     }
     
-    function () external payable {
+    receive() external payable {
         
     }
 }

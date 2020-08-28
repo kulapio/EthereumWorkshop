@@ -1,4 +1,6 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
 
 /// @title BankBalanceModule
 /// @author Nattapon Nimakul, kulap.io
@@ -10,5 +12,5 @@ interface BankBalanceModule {
     function withdraw(address user, uint withdrawAmount) external returns (uint256 remainingBal);
     function balance(address user) external view returns (uint256);
     function forceUpdateBalance(address user, uint256 newBalance) external;
-    function () external payable;
+    receive () external payable;
 }
