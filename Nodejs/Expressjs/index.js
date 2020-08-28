@@ -120,7 +120,7 @@ async function getSystemBankBalance() {
 const app = express()
 const port = 3000
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.send('<div>Hello World!</div><p/>try: <a href="http://localhost:3000/bankBalance">http://localhost:3000/bankBalance</a>'))
 app.get('/bankBalance', async (req, res) => res.send(await getSystemBankBalance()))
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
