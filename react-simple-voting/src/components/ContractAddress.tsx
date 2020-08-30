@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { store } from '../store'
 
 export const ContractAddress = observer(() => {
-  const [addr, setAddr] = useState<string>()
+  const [addr, setAddr] = useState(store.contractAddress)
   return (
     <div
       className="inline-flex flex-col mx-auto mt-12 items-center p-12"

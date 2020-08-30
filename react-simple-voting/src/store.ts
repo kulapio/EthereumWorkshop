@@ -4,16 +4,16 @@ import Web3 from 'web3'
 
 const CONTRACT_ADDRESS_KEY = 'voting_react_contractAddress'
 class Store {
-  @observable contractAddress: string | undefined | null = sessionStorage
-    ? sessionStorage.getItem(CONTRACT_ADDRESS_KEY)
+  @observable contractAddress: string | undefined = localStorage
+    ? localStorage.getItem(CONTRACT_ADDRESS_KEY) || undefined
     : undefined
   @action
   updateContractAddress = (addr: string | undefined) => {
     this.contractAddress = addr
     if (addr) {
-      sessionStorage.setItem(CONTRACT_ADDRESS_KEY, addr)
+      localStorage.setItem(CONTRACT_ADDRESS_KEY, addr)
     } else {
-      sessionStorage.removeItem(CONTRACT_ADDRESS_KEY)
+      localStorage.removeItem(CONTRACT_ADDRESS_KEY)
     }
   }
 
