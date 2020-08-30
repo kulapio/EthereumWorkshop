@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { store } from '../store'
-import { ExternalLink } from '../svg/ExternalLink'
 
 export const ContractAddress = observer(() => {
+  const [addr, setAddr] = useState<string>()
   return (
     <div
       className="inline-flex flex-col mx-auto mt-12 items-center p-12"
@@ -11,26 +11,30 @@ export const ContractAddress = observer(() => {
     >
       <div className="text-2xl text-white mb-2">Contract Address</div>
       <input
-        value={
-          store.contractAddress ? (store.contractAddress as string) : undefined
-        }
+        value={addr}
         onChange={(e) => {
-          store.updateContractAddress(e.target.value)
+          setAddr(e.target.value)
         }}
         className="max-w-full bg-white focus:outline-none focus:shadow-outline border border-gray-300 text-2xl rounded-lg py-4 px-8 block appearance-none leading-normal"
         placeholder="0x1212312121"
         style={{ width: '40rem' }}
       />
-      <div className="flex items-center mt-6">
-        <button className="bg-indigo-700 hover:bg-indigo-800 text-lg text-white font-bold py-2 px-4 rounded w-full md:w-64">
+      <div className="flex flex-col justify-center items-center mt-6">
+        <button
+          className="bg-indigo-700 hover:bg-indigo-800 text-lg text-white font-bold py-2 px-4 rounded w-full md:w-64"
+          onClick={() => {
+            store.updateContractAddress(addr)
+          }}
+        >
           Load
         </button>
         <a
           href={`https://kovan.etherscan.io/address/${store.contractAddress}`}
+          className="underline flex items-baseline text-white text-sm mt-2"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <ExternalLink className="w-8 h-8 text-white ml-4" />
+          Open on EtherScan
         </a>
       </div>
     </div>
