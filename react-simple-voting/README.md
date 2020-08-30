@@ -1,5 +1,7 @@
 # Simple Voting (React)
 
+An example DApp for Simple Voting Workshop. Powered by React.
+
 ## Development
 
 ### Install dependencies
@@ -19,3 +21,8 @@ yarn start
 ```
 yarn build
 ```
+
+## Contributors
+
+- Aikdanai Sidhikosol ([GitHub](https://github.com/blutarche),
+  [Facebook](https://facebook.com/aikdanai.s))
