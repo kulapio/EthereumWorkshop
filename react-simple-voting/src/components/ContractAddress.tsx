@@ -15,7 +15,7 @@ export const ContractAddress = observer(() => {
         onChange={(e) => {
           setAddr(e.target.value)
         }}
-        className="max-w-full bg-white focus:outline-none focus:shadow-outline border border-gray-300 text-2xl rounded-lg py-4 px-8 block appearance-none leading-normal"
+        className="max-w-full bg-white focus:outline-none focus:shadow-outline border border-gray-300 text-lg rounded-lg py-4 px-8 block appearance-none leading-normal"
         placeholder="0x1212312121"
         style={{ width: '40rem' }}
       />
