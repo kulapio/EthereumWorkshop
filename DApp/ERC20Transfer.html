@@ -8,6 +8,7 @@
         <script type="text/javascript">
 
             var contractAddress = '0x2eb37fb560992423aC00746Ce2Ca65e97319A6c9';
+            var tokenDecimals = 18;
             var abi = [
 	{
 		"constant": true,
@@ -729,26 +730,26 @@
                   switch (netId) {
                     case 1:
                         network = 'Mainnet';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Rinkeby';
                       break
                     case 2:
                         network = 'Deprecated Morden';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Rinkeby';
                       break
                     case 3:
                         network = 'Ropsten';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Rinkeby';
                       break
                     case 4:
                         network = 'Rinkeby';
-                        warning = 'please switch your network to Kovan';
                       break
                     case 42:
                         network = 'Kovan';
+                        warning = 'please switch your network to Rinkeby';
                       break
                     default:
                         network = 'Unknown';
-                        warning = 'please switch your network to Kovan';
+                        warning = 'please switch your network to Rinkeby';
                   }
                   $("#eth_network").text(network);
                   $("#warning").text(warning);
@@ -776,9 +777,22 @@
                       $("#token_name").html(symbol)
                     })
 
+                    // Get balance
                     contract.methods.balanceOf(userAccount).call().then(balance => {
-                      $("#token_balance").html(balance)
+                      console.log('balance', balance.toString())
+                      // Get decimals
+                      contract.methods.decimals().call().then(decimals => {
+                        console.log('decimals', decimals.toString())
+                        tokenDecimals = decimals
+                        $("#token_decimals").html('( decimals: ' + tokenDecimals + ' )')
+
+                        balance = balance / (10**decimals)
+                        console.log(balance.toString())
+                        $("#token_balance").html(balance)
+                      })
                     })
+
+                    $("#token_address").html(contractAddress)
                 }
                 catch(err) {
                     console.log(err);
@@ -807,7 +821,7 @@
         
         <!-- Ether transfer -->
         <script type="text/javascript">
-            function etherTransfer() {
+            function tokenTransfer() {
               let toAddress = $("#toAddress").val()
               let amountInText = $("#amount").val()
 
@@ -815,14 +829,22 @@
               console.log('amountInText: ' + amountInText)
 
               let sender = userAccount;
-              let amount = web3.utils.toWei(amountInText, "ether")
-              web3.eth.sendTransaction(
-                {
-                  from: sender,
-                  to: toAddress,
-                  value: amount
-                }
-              )
+              let amount = web3.utils.toBN(amountInText) * (10 ** tokenDecimals)
+
+              let option = {
+                from: sender
+              }
+              let contract = new web3.eth.Contract(abi, contractAddress)
+              console.log('contract', contract)
+
+              contract.methods.transfer(toAddress, amount).send(option)
+              // web3.eth.sendTransaction(
+              //   {
+              //     from: sender,
+              //     to: toAddress,
+              //     value: amount
+              //   }
+              // )
               .on('error', (error) => { 
                 console.error(error) 
                 $("#status_value").text('Failed').css("color", "red");
@@ -849,7 +871,16 @@
                   callback(ok);
               })
             }
+
+            function openContractOnEtherScan() {
+              let url = 'https://' + network + '.etherscan.io/token/' + contractAddress
+              window.open(url,'_blank');
+            }
             
+            function openUserAddressOnEtherScan() {
+              let url = 'https://' + network  + '.etherscan.io/address/' + userAccount
+              window.open(url,'_blank');
+            }
         </script>
       
         <style type="text/css">
@@ -932,13 +963,13 @@
                 <div class="field">
                   <label class="label">Amount</label>
                   <div class="control">
-                    <input id="amount" class="input" type="text" placeholder="amount to transfer" value="0.01">
+                    <input id="amount" class="input" type="text" placeholder="amount to transfer" value="10">
                   </div>
                 </div>
 
                 <div class="field is-grouped">
                   <div class="control">
-                    <button class="button is-link" onclick="javascript:etherTransfer()">Submit</button>
+                    <button class="button is-link" onclick="javascript:tokenTransfer()">Submit</button>
                   </div>
                 </div>
               </p>
@@ -953,7 +984,7 @@
                     <td class="table-label">account:</td>
                     <td class="table-value">
                       <span id="eth_address"></span>
-                      <a href="javascript:openUserAddressOnEtherScan();" target="_blank" style="margin-left: 8px;">
+                      <a href="javascript:openUserAddressOnEtherScan();" style="margin-left: 8px;">
                         <i class="fas fa-lg fa-external-link-alt"></i>
                       </a>
                     </td>
@@ -963,12 +994,24 @@
                     <td class="table-value"><span id="balance"></span></td>
                   </tr>
                   <tr>
-                    <td class="table-label">token name:</td>
-                    <td class="table-value"><span id="token_name">[[ name ]]</span></td>
+                    <td class="table-label">token:</td>
+                    <td class="table-value">
+                      <span id="token_name">[[ name ]]</span>
+                      <span id="token_decimals">[[ decimals ]]</span>
+                      <a href="javascript:openContractOnEtherScan();" style="margin-left: 8px;">
+                        <i class="fas fa-lg fa-external-link-alt"></i>
+                      </a>
+                    </td>
                   </tr>
                   <tr>
                     <td class="table-label">token balance:</td>
                     <td class="table-value"><span id="token_balance">[[ balance ]]</span></td>
+                  </tr>
+                  <tr>
+                    <td class="table-label">token address:</td>
+                    <td class="table-value">
+                      <span id="token_address">[[ contract address ]]</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>

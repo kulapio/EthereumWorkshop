@@ -407,12 +407,12 @@
 
             function openContractOnEtherScan() {
               let address = $("#candidateContractAddress").val()
-              let url = 'https://kovan.etherscan.io/address/' + address
+              let url = 'https://' + network + '.etherscan.io/address/' + address
               window.open(url,'_blank');
             }
 
             function openUserAddressOnEtherScan() {
-              let url = 'https://kovan.etherscan.io/address/' + userAccount
+              let url = 'https://' + network + '.etherscan.io/address/' + userAccount
               window.open(url,'_blank');
             }
             
@@ -501,7 +501,7 @@
                       <td class="table-value">
                         <input id="candidateContractAddress" class="input is-rounded" style="width:27em;" type="text" placeholder="Rounded input" />
                         <button class="candidate_vote_button button is-warning is-success is-rounded" style="font-size:16px;" onClick="javascript:reloadCandidateContract();">Load</button>
-                        <a href="javascript:openContractOnEtherScan();" target="_blank" style="margin-left: 8px;">
+                        <a href="javascript:openContractOnEtherScan();" style="margin-left: 8px;">
                           <i class="fas fa-lg fa-external-link-alt"></i>
                         </a>
                       </td>
@@ -523,7 +523,7 @@
                     <td class="table-label">account:</td>
                     <td class="table-value">
                       <span id="eth_address"></span>
-                      <a href="javascript:openUserAddressOnEtherScan();" target="_blank" style="margin-left: 8px;">
+                      <a href="javascript:openUserAddressOnEtherScan();" style="margin-left: 8px;">
                         <i class="fas fa-lg fa-external-link-alt"></i>
                       </a>
                     </td>
