@@ -107,6 +107,6 @@ docker run --name besu-clique -d --mount type=bind,source=/home/ec2-user/besu/cl
 
 Explorer
 ```
-docker run --name explorer -d -p 80:80 -e APP_NODE_URL=http://1.2.3.4:8545 alethio/ethereum-lite-explorer
+docker run --name explorer -d -p 80:80 -e APP_NODE_URL=http://127.0.0.1:8545 alethio/ethereum-lite-explorer
 
 ```
