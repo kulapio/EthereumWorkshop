@@ -104,3 +104,9 @@ docker run --name besu-clique -d --mount type=bind,source=/home/ec2-user/besu/cl
 --rpc-http-host="0.0.0.0" --rpc-http-enabled --rpc-ws-enabled \
 --data-path=/var/lib/besu --node-private-key-file=/var/lib/besu/key --genesis-file=/var/lib/besu/genesis.json
 ```
+
+Explorer
+```
+docker run --name explorer -d -p 80:80 -e APP_NODE_URL=http://1.2.3.4:8545 alethio/ethereum-lite-explorer
+
+```
