@@ -8,6 +8,7 @@
         <script type="text/javascript">
             var contractAddress = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015';
             var network = "";
+            let networkDisplay = "";
             var userAccount = '';
             var warning = "";
             let abi = [
@@ -115,6 +116,7 @@
               "type": "function"
             }
           ]
+            let KULAPBesuNetworkId = 2027
         </script>
         <script type="text/javascript">
           window.addEventListener('load', function() {
@@ -145,9 +147,9 @@
               } else {
                 console.log('No web3? You should consider trying MetaMask!')
                 // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-                // web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/" ));
+                web3 = new Web3( new Web3.providers.HttpProvider( "https://kovan.infura.io/v3/YOUR_INFURA_KEY" ));
                 //web3 = new Web3( new Web3.providers.HttpProvider( "http://localhost:8545/" ));
-                web3 = new Web3( new Web3.providers.HttpProvider( "https://rpc.tch.in.th" ));
+                // web3 = new Web3( new Web3.providers.HttpProvider( "https://rpc.tch.in.th" ));
                 
                 // Now you can start your app & access web3 freely:
                 startApp();
@@ -163,34 +165,48 @@
                   switch (netId) {
                     case 1:
                         network = 'Mainnet';
+                        networkDisplay = network;
                         warning = 'please switch your network to Kovan or Thai Chain';
-                      break
+                        break
                     case 2:
                         network = 'Deprecated Morden';
+                        networkDisplay = network;
                         warning = 'please switch your network to Kovan or Thai Chain';
-                      break
+                        break
                     case 3:
                         network = 'Ropsten';
+                        networkDisplay = network;
                         warning = 'please switch your network to Kovan or Thai Chain';
-                      break
+                        break
                     case 4:
                         network = 'Rinkeby';
-                      break
+                        networkDisplay = network;
+                        contractAddress = '0x6075b70b4f94af25e047fac6a538ea06a5206bca';
+                        break
                     case 7:
                         network = 'Thai Chain';
+                        networkDisplay = network;
                         contractAddress = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6';
-                      break
+                        break
                     case 42:
                         network = 'Kovan';
-                      break
+                        networkDisplay = network;
+                        break
                     case 5777:
                         network = 'Ganache';
-                      break
+                        networkDisplay = network;
+                        break
+                    case KULAPBesuNetworkId:
+                        network = 'KULAP Besu'
+                        networkDisplay = '<strong>KULAP Besu</strong><br/>(Enterprise Blockchain)';
+                        contractAddress = '0x5924aC8829CE51674415Ae619C796C12815010eF';
+                        break
                     default:
                         network = 'Unknown';
+                        networkDisplay = network;
                         warning = 'please switch your network to Kovan or Thai Chain';
                   }
-                  $("#eth_network").text(network);
+                  $("#eth_network").html(networkDisplay);
                   $("#warning").text(warning);
                   $("#candidateContractAddress").val(contractAddress);
                   
@@ -326,6 +342,8 @@
                       let link
                       if ('Thai Chain' == network) {
                         link = "https://exp.tch.in.th/tx/" + transactionHash
+                      } else if ('KULAP Besu' == network) {
+                        link = "http://besu1.kulap.io/tx/" + transactionHash
                       } else {
                         link = "https://" + network.toLowerCase() + ".etherscan.io/tx/" + transactionHash
                       }
@@ -429,7 +447,7 @@
             padding: 10px;
             border-color: #2196F3;
             text-align: center;
-            width: 11em;
+            width: 15em;
             margin: auto;
             margin-top: 20px;
         }
@@ -501,7 +519,7 @@
                       <td class="table-value">
                         <input id="candidateContractAddress" class="input is-rounded" style="width:27em;" type="text" placeholder="Rounded input" />
                         <button class="candidate_vote_button button is-warning is-success is-rounded" style="font-size:16px;" onClick="javascript:reloadCandidateContract();">Load</button>
-                        <a href="javascript:openContractOnEtherScan();" style="margin-left: 8px;">
+                        <a href="javascript:openContractOnEtherScan();" target="_blank" style="margin-left: 8px;">
                           <i class="fas fa-lg fa-external-link-alt"></i>
                         </a>
                       </td>
@@ -523,7 +541,7 @@
                     <td class="table-label">account:</td>
                     <td class="table-value">
                       <span id="eth_address"></span>
-                      <a href="javascript:openUserAddressOnEtherScan();" style="margin-left: 8px;">
+                      <a href="javascript:openUserAddressOnEtherScan();" target="_blank" style="margin-left: 8px;">
                         <i class="fas fa-lg fa-external-link-alt"></i>
                       </a>
                     </td>
