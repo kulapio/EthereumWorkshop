@@ -9,6 +9,7 @@
             var contractAddress = '0x6c527b7c6bbd2374791998c6abf9f90bca70d015';
             var network = "";
             let networkDisplay = "";
+            var explorerUrl = "";
             var userAccount = '';
             var warning = "";
             let abi = [
@@ -167,30 +168,42 @@
                         network = 'Mainnet';
                         networkDisplay = network;
                         warning = 'please switch your network to Kovan or Thai Chain';
+                        explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
                         break
                     case 2:
                         network = 'Deprecated Morden';
                         networkDisplay = network;
                         warning = 'please switch your network to Kovan or Thai Chain';
+                        explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
                         break
                     case 3:
                         network = 'Ropsten';
                         networkDisplay = network;
                         warning = 'please switch your network to Kovan or Thai Chain';
+                        explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
                         break
                     case 4:
                         network = 'Rinkeby';
                         networkDisplay = network;
                         contractAddress = '0x6075b70b4f94af25e047fac6a538ea06a5206bca';
+                        explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
                         break
                     case 7:
                         network = 'Thai Chain';
                         networkDisplay = network;
                         contractAddress = '0x0898424ddf8f9478aad9f2280a6480f1858ad1c6';
+                        explorerUrl = "https://exp.tch.in.th/tx/"
                         break
                     case 42:
                         network = 'Kovan';
                         networkDisplay = network;
+                        explorerUrl = "https://" + network.toLowerCase() + ".etherscan.io/tx/"
+                        break
+                    case 1337:
+                        network = 'Kovan - Optimism';
+                        networkDisplay = '<strong>Kovan Optimism</strong><br/>(Level 2 Ethereum)';
+                        contractAddress = '0xE6dCD042c4dDaC0f390A7B1CB8B4D60DD20b6338';
+                        explorerUrl = "https://kovan-l2-explorer.surge.sh/tx/";
                         break
                     case 5777:
                         network = 'Ganache';
@@ -200,6 +213,7 @@
                         network = 'KULAP Besu'
                         networkDisplay = '<strong>KULAP Besu</strong><br/>(Enterprise Blockchain)';
                         contractAddress = '0x5924aC8829CE51674415Ae619C796C12815010eF';
+                        explorerUrl = "http://besu1.kulap.io/tx/";
                         break
                     default:
                         network = 'Unknown';
@@ -339,14 +353,7 @@
                       // Show tx hash
                       console.log(transactionHash)
 
-                      let link
-                      if ('Thai Chain' == network) {
-                        link = "https://exp.tch.in.th/tx/" + transactionHash
-                      } else if ('KULAP Besu' == network) {
-                        link = "http://besu1.kulap.io/tx/" + transactionHash
-                      } else {
-                        link = "https://" + network.toLowerCase() + ".etherscan.io/tx/" + transactionHash
-                      }
+                      let link = explorerUrl + transactionHash
                       $("#tx_link").attr("href", link)
                       $("#tx_link").text(link)
 
